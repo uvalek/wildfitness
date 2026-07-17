@@ -13,6 +13,8 @@ import {
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { Modal } from "@/components/Modal";
+import { useRol } from "@/components/RoleProvider";
+import { puedeGestionarInventario } from "@/lib/roles";
 import {
   getProductos,
   getVentasHoy,
@@ -32,6 +34,8 @@ const CAT_ESTILO: Record<CategoriaProducto, string> = {
 const CATEGORIAS: CategoriaProducto[] = ["Bebida", "Snack", "Suplemento"];
 
 export default function TiendaPage() {
+  const { rol } = useRol();
+  const gestionar = puedeGestionarInventario(rol); // solo el dueño
   const [productos, setProductos] = useState<Producto[]>([]);
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [productoId, setProductoId] = useState("");
@@ -128,13 +132,15 @@ export default function TiendaPage() {
         titulo="Tienda"
         descripcion="Inventario y punto de venta"
         accion={
-          <button
-            onClick={() => setModal(true)}
-            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110"
-          >
-            <PackagePlus size={18} />
-            Nuevo producto
-          </button>
+          gestionar ? (
+            <button
+              onClick={() => setModal(true)}
+              className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110"
+            >
+              <PackagePlus size={18} />
+              Nuevo producto
+            </button>
+          ) : undefined
         }
       />
 
@@ -157,7 +163,9 @@ export default function TiendaPage() {
                   <th className="px-5 py-3 font-medium">Categoría</th>
                   <th className="px-5 py-3 font-medium">Precio</th>
                   <th className="px-5 py-3 font-medium">Stock</th>
-                  <th className="px-5 py-3 font-medium text-right">Acción</th>
+                  {gestionar && (
+                    <th className="px-5 py-3 font-medium text-right">Acción</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-800/70">
@@ -191,23 +199,25 @@ export default function TiendaPage() {
                           <span className="text-white/70">{p.stock}</span>
                         )}
                       </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <button
-                          onClick={() => eliminarProducto(p)}
-                          disabled={eliminandoId === p.id}
-                          title="Eliminar producto"
-                          className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-blood-500/50 hover:bg-blood-500/10 hover:text-blood-400 disabled:opacity-50"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </td>
+                      {gestionar && (
+                        <td className="px-5 py-3.5 text-right">
+                          <button
+                            onClick={() => eliminarProducto(p)}
+                            disabled={eliminandoId === p.id}
+                            title="Eliminar producto"
+                            className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-blood-500/50 hover:bg-blood-500/10 hover:text-blood-400 disabled:opacity-50"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
                 {productos.length === 0 && (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={gestionar ? 5 : 4}
                       className="px-5 py-10 text-center text-sm text-white/30"
                     >
                       Sin productos. Agrega uno con “Nuevo producto”.

@@ -17,6 +17,8 @@ import {
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
+import { useRol } from "./RoleProvider";
+import { puedeAcceder, ROL_LABEL } from "@/lib/roles";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -31,11 +33,12 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
-  const [email, setEmail] = useState<string | null>(null);
+  const { rol, email } = useRol();
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
-  }, []);
+  // Solo muestra las vistas permitidas para el rol actual.
+  const navVisible = rol
+    ? NAV.filter(({ href }) => puedeAcceder(rol, href))
+    : [];
 
   async function cerrarSesion() {
     await supabase.auth.signOut();
@@ -49,7 +52,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 px-3">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {navVisible.map(({ href, label, icon: Icon }) => {
           const activo = pathname === href;
           return (
             <Link
@@ -82,9 +85,16 @@ export function Sidebar() {
       <div className="border-t border-ink-800 p-3">
         {email && (
           <div className="mb-1 px-3 py-1.5">
-            <p className="text-[10px] uppercase tracking-wide text-white/30">
-              Sesión
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[10px] uppercase tracking-wide text-white/30">
+                Sesión
+              </p>
+              {rol && (
+                <span className="rounded bg-blood-600/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blood-400">
+                  {ROL_LABEL[rol]}
+                </span>
+              )}
+            </div>
             <p className="truncate text-xs text-white/60">{email}</p>
           </div>
         )}

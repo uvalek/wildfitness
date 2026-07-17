@@ -18,6 +18,23 @@ protegidas por [`components/AuthGuard.tsx`](components/AuthGuard.tsx): sin sesi�
 redirige a `/login`. La sesión persiste entre recargas y "Cerrar sesión" hace
 `supabase.auth.signOut()`. Los usuarios se administran en Supabase → Authentication.
 
+## Roles y permisos
+
+Dos roles (tabla `wf_perfiles`, definición en [`lib/roles.ts`](lib/roles.ts)):
+
+| Rol | Vistas | Puede |
+| --- | --- | --- |
+| **owner** (dueño) | Todas | Todo: socios, inventario (alta/baja), ingresos, dashboard |
+| **recepcionista** | Check-in, Tienda | Registrar ventas, ver ventas del día, check-in y renovar en mostrador. **No** ve ingresos ni gestiona inventario |
+
+- El rol se carga tras el login ([`components/RoleProvider.tsx`](components/RoleProvider.tsx)),
+  filtra el menú, protege las rutas y define la vista inicial (dueño → dashboard,
+  recepción → check-in).
+- **Doble candado**: además del gateo en la UI, hay **RLS por rol** en Supabase
+  (`wf_rol()` + políticas): el recepcionista no puede crear/eliminar productos ni
+  leer `wf_ingresos_mensuales` aunque llame la API directamente.
+- Asignar roles: editar la tabla `wf_perfiles` (o el `seed.sql`).
+
 ## Arquitectura de datos
 
 **Toda** lectura/escritura pasa por una única capa: [`lib/data.ts`](lib/data.ts),

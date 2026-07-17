@@ -55,12 +55,28 @@ create table if not exists public.wf_ingresos_mensuales (
   tienda       numeric(12,2) not null default 0
 );
 
+-- Perfiles / roles de acceso al panel (owner | recepcionista)
+create table if not exists public.wf_perfiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  email   text,
+  rol     text not null check (rol in ('owner','recepcionista')),
+  created_at timestamptz not null default now()
+);
+alter table public.wf_perfiles enable row level security;
+create policy wf_perfiles_self_select on public.wf_perfiles
+  for select to authenticated using (user_id = auth.uid());
+
+-- Rol del usuario en sesión (para usar en políticas RLS).
+create or replace function public.wf_rol()
+returns text language sql stable security definer set search_path = public as $$
+  select rol from public.wf_perfiles where user_id = auth.uid();
+$$;
+
 create index if not exists wf_ventas_fecha_idx   on public.wf_ventas (fecha);
 create index if not exists wf_checkins_fecha_idx on public.wf_checkins (fecha);
 create index if not exists wf_socios_venc_idx    on public.wf_socios (fecha_vencimiento);
 
--- RLS: permisivo para el demo (panel admin sin login). En producción se
--- reemplazan estas políticas por reglas basadas en auth.uid() / roles.
+-- RLS. Todas las tablas requieren sesión (rol `authenticated`).
 alter table public.wf_precios_membresia  enable row level security;
 alter table public.wf_socios             enable row level security;
 alter table public.wf_productos          enable row level security;
@@ -68,5 +84,10 @@ alter table public.wf_ventas             enable row level security;
 alter table public.wf_checkins           enable row level security;
 alter table public.wf_ingresos_mensuales enable row level security;
 
--- (una política "for all to anon, authenticated using(true) with check(true)"
---  por tabla — ver do-block en la migración wild_fitness_schema)
+-- Acceso general para autenticados (socios, ventas, checkins, precios):
+--   create policy ... for all to authenticated using (true) with check (true);
+-- Productos: lectura/actualización para todos; alta y baja solo dueño:
+--   select/update  -> to authenticated using (true)
+--   insert/delete  -> to authenticated using (public.wf_rol() = 'owner')
+-- Ingresos: solo dueño -> for all to authenticated using (public.wf_rol() = 'owner')
+-- (Ver migraciones wild_fitness_rls_authenticated_only y wild_fitness_roles.)

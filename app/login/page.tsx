@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Lock, User, ArrowRight, AlertCircle } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/lib/supabaseClient";
+import { getMiRol } from "@/lib/data";
+import { RUTA_INICIAL } from "@/lib/roles";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,10 +15,13 @@ export default function LoginPage() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Si ya hay sesión activa, entra directo al dashboard.
+  // Si ya hay sesión activa, entra directo a la vista de su rol.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace("/dashboard");
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session) {
+        const rol = await getMiRol();
+        router.replace(RUTA_INICIAL[rol]);
+      }
     });
   }, [router]);
 
@@ -39,7 +44,9 @@ export default function LoginPage() {
       setCargando(false);
       return;
     }
-    router.push("/dashboard");
+    // Redirige según el rol (dueño → dashboard, recepción → check-in).
+    const rol = await getMiRol();
+    router.push(RUTA_INICIAL[rol]);
   }
 
   return (

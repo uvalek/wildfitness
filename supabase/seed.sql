@@ -16,6 +16,14 @@ insert into public.wf_precios_membresia (tipo, precio) values
   ('Semanal', 100), ('Quincenal', 180), ('Mensual', 300), ('Anual', 3000)
 on conflict (tipo) do update set precio = excluded.precio;
 
+-- Roles de acceso (busca los usuarios por correo en Supabase Auth).
+insert into public.wf_perfiles (user_id, email, rol)
+select id, email,
+       case email when 'alekhammer13@gmail.com' then 'owner' else 'recepcionista' end
+from auth.users
+where email in ('alekhammer13@gmail.com','alekchez@outlook.com')
+on conflict (user_id) do update set rol = excluded.rol, email = excluded.email;
+
 insert into public.wf_socios (nombre, telefono, tipo_membresia, fecha_inicio, fecha_vencimiento) values
   ('Jesús Herrera Domínguez', '55 1423 8890', 'Mensual', current_date - 34, current_date - 4),
   ('Mariana Ríos Cázares',    '33 2290 5567', 'Semanal', current_date - 12, current_date - 5),

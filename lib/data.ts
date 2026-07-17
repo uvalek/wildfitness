@@ -21,6 +21,24 @@ import type {
 } from "./types";
 import { supabase } from "./supabaseClient";
 import { calcularEstatus, diasParaVencer, calcularRenovacion } from "./utils";
+import type { Rol } from "./roles";
+
+// -------------------------------- ROLES ------------------------------------
+
+/** Rol del usuario en sesión. Por seguridad, ante la duda devuelve el rol
+ *  con menos privilegios ("recepcionista"). */
+export async function getMiRol(): Promise<Rol> {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) return "recepcionista";
+  const { data, error } = await supabase
+    .from("wf_perfiles")
+    .select("rol")
+    .eq("user_id", uid)
+    .maybeSingle();
+  if (error || !data) return "recepcionista";
+  return (data as { rol: Rol }).rol;
+}
 
 // ---------------------------------------------------------------------------
 //  Mapeadores fila (snake_case DB) -> objeto de dominio (camelCase)
