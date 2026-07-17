@@ -10,6 +10,7 @@ import {
   Bell,
   ShoppingBag,
   Wallet,
+  ShieldCheck,
   LogOut,
   Menu,
   X,
@@ -27,6 +28,7 @@ const NAV = [
   { href: "/recordatorios", label: "Recordatorios", icon: Bell },
   { href: "/tienda", label: "Tienda", icon: ShoppingBag },
   { href: "/ingresos", label: "Ingresos", icon: Wallet },
+  { href: "/seguridad", label: "Seguridad", icon: ShieldCheck },
 ];
 
 export function Sidebar() {

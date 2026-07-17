@@ -14,6 +14,7 @@ export const RUTAS_POR_ROL: Record<Rol, string[]> = {
     "/recordatorios",
     "/tienda",
     "/ingresos",
+    "/seguridad",
   ],
   recepcionista: ["/checkin", "/tienda"],
 };
