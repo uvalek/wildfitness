@@ -3,6 +3,7 @@ import type { EstatusMembresia, TipoMembresia } from "./types";
 /** Duración en días de cada tipo de membresía (para calcular vencimientos). */
 export const DURACION_MEMBRESIA_DIAS: Record<TipoMembresia, number> = {
   Semanal: 7,
+  Quincenal: 15,
   Mensual: 30,
   Anual: 365,
 };

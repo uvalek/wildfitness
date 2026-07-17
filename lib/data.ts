@@ -243,6 +243,32 @@ export async function getProductos(): Promise<Producto[]> {
   return (data as ProductoRow[]).map(toProducto);
 }
 
+export async function addProducto(input: {
+  nombre: string;
+  categoria: Producto["categoria"];
+  precio: number;
+  stock: number;
+}): Promise<Producto> {
+  const { data, error } = await supabase
+    .from("wf_productos")
+    .insert({
+      nombre: input.nombre,
+      categoria: input.categoria,
+      precio: input.precio,
+      stock: input.stock,
+    })
+    .select("*")
+    .single();
+  if (error) fail("addProducto", error);
+  return toProducto(data as ProductoRow);
+}
+
+/** Elimina un producto. El histórico de ventas se conserva (ON DELETE SET NULL). */
+export async function deleteProducto(id: string): Promise<void> {
+  const { error } = await supabase.from("wf_productos").delete().eq("id", id);
+  if (error) fail("deleteProducto", error);
+}
+
 /** Registra una venta: valida stock, lo baja y crea el registro. */
 export async function registrarVenta(
   productoId: string,
@@ -368,7 +394,7 @@ export async function getResumenIngresos(): Promise<ResumenIngresos> {
   const activos = socios.filter(
     (s) => calcularEstatus(s.fechaVencimiento) !== "Suspendida"
   );
-  const tipos: TipoMembresia[] = ["Semanal", "Mensual", "Anual"];
+  const tipos: TipoMembresia[] = ["Semanal", "Quincenal", "Mensual", "Anual"];
   const desglosePorMembresia = tipos.map((tipo) => {
     const cantidad = activos.filter((s) => s.tipoMembresia === tipo).length;
     return { tipo, cantidad, monto: cantidad * (precios[tipo] ?? 0) };

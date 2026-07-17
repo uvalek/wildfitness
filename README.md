@@ -29,10 +29,10 @@ Tablas (prefijo `wf_` para aislarlas del resto del proyecto):
 | Tabla                    | Contenido                                            |
 | ------------------------ | ---------------------------------------------------- |
 | `wf_socios`              | nombre, teléfono, tipo membresía, inicio, vencimiento |
-| `wf_productos`           | inventario: nombre, categoría, precio, stock          |
+| `wf_productos`           | inventario: nombre, categoría, precio, stock (alta/baja desde la app) |
 | `wf_ventas`              | ventas de tienda (ingresos de punto de venta)         |
 | `wf_checkins`            | accesos: socio, hora, estatus (permitido / no)        |
-| `wf_precios_membresia`   | precios editables (Semanal $120 / Mensual $450 / Anual $3,800) |
+| `wf_precios_membresia`   | precios editables (Semanal $100 / Quincenal $180 / Mensual $300 / Anual $3,000) |
 | `wf_ingresos_mensuales`  | histórico de 6 meses para la gráfica                  |
 
 - El estatus de membresía (Activa / Por vencer / Suspendida) se **calcula en vivo** por
@@ -51,6 +51,13 @@ Tablas (prefijo `wf_` para aislarlas del resto del proyecto):
   Ej: vencía 11 jun, renueva al volver el 13 jun (mensual) → nueva vigencia 13 jul.
 - Botón **Renovar** disponible en Socios (para Suspendida / Por vencer) y en Check-in
   (cuando un socio suspendido llega al mostrador: renueva y da acceso en un paso).
+- Tipos de membresía: Semanal (7d) · Quincenal (15d) · Mensual (30d) · Anual (365d).
+
+## Inventario de tienda
+
+Alta y baja de productos desde la vista **Tienda** (`addProducto` / `deleteProducto`
+en [`lib/data.ts`](lib/data.ts)). Al eliminar un producto con ventas, el histórico se
+conserva (la venta guarda `producto_nombre` y la FK usa `ON DELETE SET NULL`).
 
 ## Base de datos (Supabase)
 

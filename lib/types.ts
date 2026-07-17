@@ -1,7 +1,7 @@
 // Tipos centrales del dominio Wild Fitness.
 // Diseñados para mapear 1:1 a tablas de Supabase más adelante.
 
-export type TipoMembresia = "Semanal" | "Mensual" | "Anual";
+export type TipoMembresia = "Semanal" | "Quincenal" | "Mensual" | "Anual";
 
 // La membresía nunca se "cancela": al vencer pasa a "Suspendida" (sin acceso)
 // hasta que el socio renueve.

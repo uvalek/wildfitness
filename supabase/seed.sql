@@ -13,7 +13,7 @@ delete from public.wf_productos;
 alter sequence public.wf_socios_folio_seq restart with 1001;
 
 insert into public.wf_precios_membresia (tipo, precio) values
-  ('Semanal', 120), ('Mensual', 450), ('Anual', 3800)
+  ('Semanal', 100), ('Quincenal', 180), ('Mensual', 300), ('Anual', 3000)
 on conflict (tipo) do update set precio = excluded.precio;
 
 insert into public.wf_socios (nombre, telefono, tipo_membresia, fecha_inicio, fecha_vencimiento) values

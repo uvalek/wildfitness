@@ -32,9 +32,10 @@ type Estado = "ok" | "suspendida" | "renovado";
 type Resultado = { socio: Socio; estado: Estado } | null;
 
 const PRECIOS_DEFAULT: Record<TipoMembresia, number> = {
-  Semanal: 120,
-  Mensual: 450,
-  Anual: 3800,
+  Semanal: 100,
+  Quincenal: 180,
+  Mensual: 300,
+  Anual: 3000,
 };
 
 export default function CheckinPage() {

@@ -23,13 +23,14 @@ import {
   toISODate,
 } from "@/lib/utils";
 
-const TIPOS: TipoMembresia[] = ["Semanal", "Mensual", "Anual"];
+const TIPOS: TipoMembresia[] = ["Semanal", "Quincenal", "Mensual", "Anual"];
 
 // Valores por defecto mientras carga la consulta a la base de datos.
 const PRECIOS_DEFAULT: Record<TipoMembresia, number> = {
-  Semanal: 120,
-  Mensual: 450,
-  Anual: 3800,
+  Semanal: 100,
+  Quincenal: 180,
+  Mensual: 300,
+  Anual: 3000,
 };
 
 const hoyISO = () => toISODate(new Date());

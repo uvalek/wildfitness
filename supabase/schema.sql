@@ -4,7 +4,7 @@
 -- ============================================================
 
 create table if not exists public.wf_precios_membresia (
-  tipo   text primary key check (tipo in ('Semanal','Mensual','Anual')),
+  tipo   text primary key check (tipo in ('Semanal','Quincenal','Mensual','Anual')),
   precio numeric(10,2) not null
 );
 
@@ -33,7 +33,7 @@ create table if not exists public.wf_productos (
 
 create table if not exists public.wf_ventas (
   id              uuid primary key default gen_random_uuid(),
-  producto_id     uuid references public.wf_productos(id),
+  producto_id     uuid references public.wf_productos(id) on delete set null,
   producto_nombre text not null,
   cantidad        integer not null check (cantidad > 0),
   precio_unitario numeric(10,2) not null,
