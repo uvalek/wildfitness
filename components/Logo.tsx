@@ -1,26 +1,10 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Marca Wild Fitness: dos paralelogramos rojos (recreación vectorial del
- * logo del gimnasio). Vectorial → nítido a cualquier tamaño y sobre fondo
- * oscuro. Si más adelante quieres el PNG exacto, colócalo en /public y
- * cámbialo aquí por <img>.
+ * Marca Wild Fitness: monograma "WF" (W blanca + F roja).
+ * Usa el logo real en /public/wildfitlogo.png (fondo transparente, se ve
+ * bien sobre el fondo oscuro del panel).
  */
-function LogoMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      className={cn("shrink-0", className)}
-      style={{ filter: "drop-shadow(0 0 10px rgba(227,30,36,0.45))" }}
-      role="img"
-      aria-label="Wild Fitness"
-    >
-      <polygon points="30,18 92,18 78,42 16,42" fill="#E31E24" />
-      <polygon points="34,58 76,58 62,82 20,82" fill="#E31E24" />
-    </svg>
-  );
-}
-
 export function Logo({
   size = "md",
   className,
@@ -29,14 +13,22 @@ export function Logo({
   className?: string;
 }) {
   const dims = {
-    sm: { box: "h-8 w-8", text: "text-lg" },
-    md: { box: "h-10 w-10", text: "text-xl" },
-    lg: { box: "h-14 w-14", text: "text-3xl" },
+    sm: { img: "h-7", text: "text-base" },
+    md: { img: "h-8", text: "text-lg" },
+    lg: { img: "h-12", text: "text-3xl" },
   }[size];
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <LogoMark className={dims.box} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/wildfitlogo.png"
+        alt="Wild Fitness"
+        width={1090}
+        height={599}
+        className={cn("w-auto shrink-0 object-contain", dims.img)}
+        style={{ filter: "drop-shadow(0 0 10px rgba(227,30,36,0.35))" }}
+      />
       <div className="leading-none">
         <span
           className={cn(
