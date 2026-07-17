@@ -1,29 +1,55 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ScanLine, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
+import {
+  ScanLine,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+  RefreshCw,
+} from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { SearchInput } from "@/components/SearchInput";
 import { StatusBadge } from "@/components/StatusBadge";
-import { getSocios, getCheckinsHoy, registrarCheckin } from "@/lib/data";
-import type { Socio, Checkin } from "@/lib/types";
-import { calcularEstatus, formatHora, formatFecha } from "@/lib/utils";
+import {
+  getSocios,
+  getCheckinsHoy,
+  registrarCheckin,
+  renovarMembresia,
+  getPreciosMembresia,
+} from "@/lib/data";
+import type { Socio, Checkin, TipoMembresia } from "@/lib/types";
+import {
+  calcularEstatus,
+  formatHora,
+  formatFecha,
+  formatMXN,
+  calcularRenovacion,
+} from "@/lib/utils";
 
-type Resultado = {
-  socio: Socio;
-  vigente: boolean;
-} | null;
+type Estado = "ok" | "suspendida" | "renovado";
+type Resultado = { socio: Socio; estado: Estado } | null;
+
+const PRECIOS_DEFAULT: Record<TipoMembresia, number> = {
+  Semanal: 120,
+  Mensual: 450,
+  Anual: 3800,
+};
 
 export default function CheckinPage() {
   const [socios, setSocios] = useState<Socio[]>([]);
   const [checkins, setCheckins] = useState<Checkin[]>([]);
+  const [precios, setPrecios] =
+    useState<Record<TipoMembresia, number>>(PRECIOS_DEFAULT);
   const [busqueda, setBusqueda] = useState("");
   const [resultado, setResultado] = useState<Resultado>(null);
+  const [renovando, setRenovando] = useState(false);
 
   useEffect(() => {
     getSocios().then(setSocios);
     getCheckinsHoy().then(setCheckins);
+    getPreciosMembresia().then(setPrecios);
   }, []);
 
   const sugerencias = useMemo(() => {
@@ -40,10 +66,30 @@ export default function CheckinPage() {
   async function seleccionar(socio: Socio) {
     setBusqueda("");
     const estatus = calcularEstatus(socio.fechaVencimiento);
-    const vigente = estatus !== "Vencida";
+    // Membresía suspendida: no registra la visita todavía; se ofrece renovar.
+    if (estatus === "Suspendida") {
+      setResultado({ socio, estado: "suspendida" });
+      return;
+    }
     const chk = await registrarCheckin(socio.id);
     setCheckins((prev) => [chk, ...prev]);
-    setResultado({ socio, vigente });
+    setResultado({ socio, estado: "ok" });
+  }
+
+  async function renovar() {
+    if (!resultado) return;
+    setRenovando(true);
+    const actualizado = await renovarMembresia(resultado.socio.id);
+    if (actualizado) {
+      setSocios((prev) =>
+        prev.map((s) => (s.id === actualizado.id ? actualizado : s))
+      );
+      // Registra la entrada ya con la membresía vigente.
+      const chk = await registrarCheckin(actualizado.id);
+      setCheckins((prev) => [chk, ...prev]);
+      setResultado({ socio: actualizado, estado: "renovado" });
+    }
+    setRenovando(false);
   }
 
   return (
@@ -98,12 +144,16 @@ export default function CheckinPage() {
                 </div>
               )}
 
-              {resultado?.vigente && (
+              {/* Acceso permitido */}
+              {(resultado?.estado === "ok" ||
+                resultado?.estado === "renovado") && (
                 <div className="flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                   <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-400" />
                   <div>
                     <p className="font-display text-lg font-bold uppercase tracking-wide text-emerald-300">
-                      ¡Bienvenido, {resultado.socio.nombre.split(" ")[0]}! 💪
+                      {resultado.estado === "renovado"
+                        ? "¡Membresía renovada! 💪"
+                        : `¡Bienvenido, ${resultado.socio.nombre.split(" ")[0]}! 💪`}
                     </p>
                     <p className="text-sm text-emerald-200/70">
                       Socio #{resultado.socio.folio} · Acceso registrado.
@@ -114,18 +164,52 @@ export default function CheckinPage() {
                 </div>
               )}
 
-              {resultado && !resultado.vigente && (
-                <div className="flex items-start gap-3 rounded-xl border border-blood-500/40 bg-blood-500/10 p-4">
-                  <AlertTriangle className="mt-0.5 shrink-0 text-blood-400" />
-                  <div>
-                    <p className="font-display text-lg font-bold uppercase tracking-wide text-blood-400">
-                      Membresía vencida
-                    </p>
-                    <p className="text-sm text-blood-200/70">
-                      La membresía de {resultado.socio.nombre} venció el{" "}
-                      {formatFecha(resultado.socio.fechaVencimiento)}. Invítalo a
-                      renovar antes de ingresar.
-                    </p>
+              {/* Membresía suspendida: se ofrece renovar en el mostrador */}
+              {resultado?.estado === "suspendida" && (
+                <div className="rounded-xl border border-blood-500/40 bg-blood-500/10 p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="mt-0.5 shrink-0 text-blood-400" />
+                    <div>
+                      <p className="font-display text-lg font-bold uppercase tracking-wide text-blood-400">
+                        Membresía suspendida
+                      </p>
+                      <p className="text-sm text-blood-200/70">
+                        Socio #{resultado.socio.folio} · La membresía venció el{" "}
+                        {formatFecha(resultado.socio.fechaVencimiento)}. Renueva
+                        para reactivar el acceso.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Vista previa de la renovación (cuenta desde hoy) */}
+                  <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-ink-700 bg-ink-850/60 px-3 py-2.5">
+                    <div className="text-xs text-white/60">
+                      Renovar {resultado.socio.tipoMembresia} ·{" "}
+                      <span className="font-semibold text-white/80">
+                        {formatMXN(precios[resultado.socio.tipoMembresia])}
+                      </span>
+                      <br />
+                      Nueva vigencia hasta{" "}
+                      <span className="font-semibold text-emerald-400">
+                        {formatFecha(
+                          calcularRenovacion(
+                            resultado.socio.tipoMembresia,
+                            resultado.socio.fechaVencimiento
+                          ).fechaVencimiento
+                        )}
+                      </span>
+                    </div>
+                    <button
+                      onClick={renovar}
+                      disabled={renovando}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-500 disabled:opacity-60"
+                    >
+                      <RefreshCw
+                        size={14}
+                        className={renovando ? "animate-spin" : ""}
+                      />
+                      {renovando ? "Renovando…" : "Renovar y dar acceso"}
+                    </button>
                   </div>
                 </div>
               )}
@@ -168,7 +252,7 @@ export default function CheckinPage() {
                   </span>
                 ) : (
                   <span className="rounded-full bg-blood-500/15 px-2.5 py-1 text-xs font-semibold text-blood-400">
-                    Vencida
+                    Suspendida
                   </span>
                 )}
               </div>

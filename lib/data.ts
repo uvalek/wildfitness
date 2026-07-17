@@ -20,7 +20,7 @@ import type {
   IngresoMensual,
 } from "./types";
 import { supabase } from "./supabaseClient";
-import { calcularEstatus, diasParaVencer } from "./utils";
+import { calcularEstatus, diasParaVencer, calcularRenovacion } from "./utils";
 
 // ---------------------------------------------------------------------------
 //  Mapeadores fila (snake_case DB) -> objeto de dominio (camelCase)
@@ -190,6 +190,26 @@ export async function updateSocio(
   return data ? toSocio(data as SocioRow) : null;
 }
 
+/**
+ * Renueva la membresía de un socio. La nueva fecha de vencimiento se calcula
+ * desde HOY si estaba suspendida (no arrastra días muertos) o desde su
+ * vencimiento actual si sigue vigente (no pierde días pagados). Ver
+ * `calcularRenovacion` en lib/utils.ts.
+ */
+export async function renovarMembresia(socioId: string): Promise<Socio | null> {
+  const socio = await getSocioById(socioId);
+  if (!socio) return null;
+  const { fechaInicio, fechaVencimiento } = calcularRenovacion(
+    socio.tipoMembresia,
+    socio.fechaVencimiento
+  );
+  return updateSocio(socioId, {
+    fechaInicio,
+    fechaVencimiento,
+    recordatorioEnviado: false,
+  });
+}
+
 // ------------------------------ RECORDATORIOS -------------------------------
 
 /** Socios cuya membresía vence en los próximos `dias` (y no vencidos aún). */
@@ -288,7 +308,7 @@ export async function getCheckinsHoy(): Promise<Checkin[]> {
 export async function registrarCheckin(socioId: string): Promise<Checkin> {
   const socio = await getSocioById(socioId);
   if (!socio) throw new Error("Socio no encontrado");
-  const vigente = calcularEstatus(socio.fechaVencimiento) !== "Vencida";
+  const vigente = calcularEstatus(socio.fechaVencimiento) !== "Suspendida";
 
   const { data, error } = await supabase
     .from("wf_checkins")
@@ -346,7 +366,7 @@ export async function getResumenIngresos(): Promise<ResumenIngresos> {
   ]);
 
   const activos = socios.filter(
-    (s) => calcularEstatus(s.fechaVencimiento) !== "Vencida"
+    (s) => calcularEstatus(s.fechaVencimiento) !== "Suspendida"
   );
   const tipos: TipoMembresia[] = ["Semanal", "Mensual", "Anual"];
   const desglosePorMembresia = tipos.map((tipo) => {

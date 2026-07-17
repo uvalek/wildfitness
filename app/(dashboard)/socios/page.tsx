@@ -1,15 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { UserPlus, Phone } from "lucide-react";
+import { UserPlus, Phone, RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SearchInput } from "@/components/SearchInput";
 import { Modal } from "@/components/Modal";
-import { getSocios, addSocio, getPreciosMembresia } from "@/lib/data";
+import {
+  getSocios,
+  addSocio,
+  getPreciosMembresia,
+  renovarMembresia,
+} from "@/lib/data";
 import type { Socio, TipoMembresia } from "@/lib/types";
-import { formatFecha, calcularEstatus, formatMXN } from "@/lib/utils";
+import {
+  formatFecha,
+  calcularEstatus,
+  formatMXN,
+  DURACION_MEMBRESIA_DIAS,
+  sumarDias,
+  toISODate,
+} from "@/lib/utils";
 
 const TIPOS: TipoMembresia[] = ["Semanal", "Mensual", "Anual"];
 
@@ -20,21 +32,7 @@ const PRECIOS_DEFAULT: Record<TipoMembresia, number> = {
   Anual: 3800,
 };
 
-// Días de duración por tipo, para autocalcular el vencimiento.
-const DURACION: Record<TipoMembresia, number> = {
-  Semanal: 7,
-  Mensual: 30,
-  Anual: 365,
-};
-
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-function sumarDias(iso: string, dias: number) {
-  const d = new Date(iso);
-  d.setDate(d.getDate() + dias);
-  return d.toISOString().slice(0, 10);
-}
+const hoyISO = () => toISODate(new Date());
 
 export default function SociosPage() {
   const [socios, setSocios] = useState<Socio[]>([]);
@@ -64,7 +62,19 @@ export default function SociosPage() {
     );
   }, [socios, busqueda]);
 
-  const vencimiento = sumarDias(inicio, DURACION[tipo]);
+  const vencimiento = sumarDias(inicio, DURACION_MEMBRESIA_DIAS[tipo]);
+  const [renovandoId, setRenovandoId] = useState<string | null>(null);
+
+  async function renovar(socio: Socio) {
+    setRenovandoId(socio.id);
+    const actualizado = await renovarMembresia(socio.id);
+    if (actualizado) {
+      setSocios((prev) =>
+        prev.map((s) => (s.id === actualizado.id ? actualizado : s))
+      );
+    }
+    setRenovandoId(null);
+  }
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault();
@@ -123,6 +133,7 @@ export default function SociosPage() {
                 <th className="px-5 py-3 font-medium">Inicio</th>
                 <th className="px-5 py-3 font-medium">Vencimiento</th>
                 <th className="px-5 py-3 font-medium">Estatus</th>
+                <th className="px-5 py-3 font-medium text-right">Acción</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-800/70">
@@ -156,12 +167,27 @@ export default function SociosPage() {
                   <td className="px-5 py-3.5">
                     <StatusBadge estatus={calcularEstatus(s.fechaVencimiento)} />
                   </td>
+                  <td className="px-5 py-3.5 text-right">
+                    {calcularEstatus(s.fechaVencimiento) !== "Activa" && (
+                      <button
+                        onClick={() => renovar(s)}
+                        disabled={renovandoId === s.id}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-600/40 bg-emerald-600/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-600/20 disabled:opacity-50"
+                      >
+                        <RefreshCw
+                          size={13}
+                          className={renovandoId === s.id ? "animate-spin" : ""}
+                        />
+                        {renovandoId === s.id ? "Renovando…" : "Renovar"}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {filtrados.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-5 py-10 text-center text-sm text-white/30"
                   >
                     No se encontraron socios con “{busqueda}”.

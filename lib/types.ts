@@ -3,7 +3,9 @@
 
 export type TipoMembresia = "Semanal" | "Mensual" | "Anual";
 
-export type EstatusMembresia = "Activa" | "Por vencer" | "Vencida";
+// La membresía nunca se "cancela": al vencer pasa a "Suspendida" (sin acceso)
+// hasta que el socio renueve.
+export type EstatusMembresia = "Activa" | "Por vencer" | "Suspendida";
 
 export type CategoriaProducto = "Bebida" | "Snack" | "Suplemento";
 
