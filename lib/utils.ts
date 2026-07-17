@@ -18,9 +18,19 @@ export function formatMXN(monto: number): string {
   }).format(monto);
 }
 
+/**
+ * Parsea una fecha ISO respetando el día correcto: si viene sin hora
+ * ("YYYY-MM-DD", como las columnas DATE de Supabase) la interpreta en hora
+ * LOCAL — así `new Date("2026-07-17")` no se recorre un día en zonas UTC-negativas.
+ * Si trae hora (timestamp con zona), usa el parseo nativo.
+ */
+export function parseFecha(iso: string): Date {
+  return iso.includes("T") ? new Date(iso) : parseFechaLocal(iso);
+}
+
 /** Fecha corta legible: "15 jul 2026" */
 export function formatFecha(iso: string): string {
-  const d = new Date(iso);
+  const d = parseFecha(iso);
   return new Intl.DateTimeFormat("es-MX", {
     day: "2-digit",
     month: "short",
@@ -45,7 +55,7 @@ function aMedianoche(d: Date): Date {
 
 /** Días restantes hasta la fecha de vencimiento (negativo si ya pasó). */
 export function diasParaVencer(fechaVencimiento: string, hoy: Date = new Date()): number {
-  const venc = aMedianoche(new Date(fechaVencimiento));
+  const venc = aMedianoche(parseFecha(fechaVencimiento));
   const ref = aMedianoche(hoy);
   const ms = venc.getTime() - ref.getTime();
   return Math.round(ms / (1000 * 60 * 60 * 24));
@@ -103,6 +113,22 @@ export function calcularRenovacion(
     fechaInicio: toISODate(hoyMid),
     fechaVencimiento: sumarDias(toISODate(base), DURACION_MEMBRESIA_DIAS[tipo]),
   };
+}
+
+/** Días transcurridos entre una fecha pasada y hoy (0 = hoy, 1 = ayer, …). */
+export function diasAtras(fecha: string, hoy: Date = new Date()): number {
+  const d = parseFecha(fecha);
+  const a = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const b = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/** Etiqueta legible de un día relativo: "Hoy", "Ayer" o la fecha. */
+export function etiquetaDia(fecha: string, hoy: Date = new Date()): string {
+  const n = diasAtras(fecha, hoy);
+  if (n === 0) return "Hoy";
+  if (n === 1) return "Ayer";
+  return formatFecha(fecha);
 }
 
 /** Une clases condicionales sin dependencias externas. */

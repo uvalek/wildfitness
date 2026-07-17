@@ -348,6 +348,20 @@ export async function getCheckinsHoy(): Promise<Checkin[]> {
   return (data as CheckinRow[]).map(toCheckin);
 }
 
+/** Visitas de los últimos `dias` días (incluye hoy), ordenadas de la más
+ *  reciente a la más antigua. Para el registro agrupado por día. */
+export async function getCheckinsRecientes(dias = 5): Promise<Checkin[]> {
+  const d = new Date();
+  const desde = new Date(d.getFullYear(), d.getMonth(), d.getDate() - (dias - 1));
+  const { data, error } = await supabase
+    .from("wf_checkins")
+    .select("*")
+    .gte("fecha", desde.toISOString())
+    .order("fecha", { ascending: false });
+  if (error) fail("getCheckinsRecientes", error);
+  return (data as CheckinRow[]).map(toCheckin);
+}
+
 /** Registra la entrada de un socio con fecha/hora actuales. */
 export async function registrarCheckin(socioId: string): Promise<Checkin> {
   const socio = await getSocioById(socioId);

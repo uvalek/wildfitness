@@ -73,13 +73,35 @@ from (values
 ) as v(nombre, cantidad, hora)
 join public.wf_productos p on p.nombre = v.nombre;
 
--- Visitas de hoy
+-- Visitas de hoy y de los 4 días anteriores (registro agrupado por día)
 insert into public.wf_checkins (socio_id, socio_nombre, fecha, membresia_vigente)
-select s.id, s.nombre, date_trunc('day', now()) + c.hora, true
+select s.id, s.nombre,
+       date_trunc('day', now()) - (c.dias || ' days')::interval + c.hora, true
 from (values
-  ('Sofía Mendoza Guerra',  interval '6 hours 32 minutes'),
-  ('Santiago Ramírez León', interval '7 hours 15 minutes'),
-  ('Alejandro Torres Vega', interval '8 hours 40 minutes'),
-  ('Ximena Delgado Rosas',  interval '9 hours 55 minutes')
-) as c(nombre, hora)
+  -- Hoy
+  ('Sofía Mendoza Guerra',    0, interval '6 hours 32 minutes'),
+  ('Santiago Ramírez León',   0, interval '7 hours 15 minutes'),
+  ('Alejandro Torres Vega',   0, interval '8 hours 40 minutes'),
+  ('Ximena Delgado Rosas',    0, interval '9 hours 55 minutes'),
+  -- Ayer
+  ('Sofía Mendoza Guerra',    1, interval '6 hours 40 minutes'),
+  ('Alejandro Torres Vega',   1, interval '7 hours 30 minutes'),
+  ('Regina Castillo Ponce',   1, interval '9 hours 05 minutes'),
+  ('Leonardo Vargas Mejía',   1, interval '18 hours 20 minutes'),
+  ('Camila Núñez Bravo',      1, interval '19 hours 10 minutes'),
+  -- Hace 2 días
+  ('Santiago Ramírez León',   2, interval '7 hours 15 minutes'),
+  ('Ximena Delgado Rosas',    2, interval '8 hours 50 minutes'),
+  ('Mateo Guzmán Ibarra',     2, interval '17 hours 40 minutes'),
+  ('Sebastián Cortés Flores', 2, interval '20 hours 05 minutes'),
+  -- Hace 3 días
+  ('Sofía Mendoza Guerra',    3, interval '6 hours 55 minutes'),
+  ('Andrea Lozano Campos',    3, interval '10 hours 10 minutes'),
+  ('Alejandro Torres Vega',   3, interval '19 hours 30 minutes'),
+  -- Hace 4 días
+  ('Regina Castillo Ponce',   4, interval '7 hours 45 minutes'),
+  ('Santiago Ramírez León',   4, interval '9 hours 20 minutes'),
+  ('Camila Núñez Bravo',      4, interval '18 hours 00 minutes'),
+  ('Ximena Delgado Rosas',    4, interval '20 hours 30 minutes')
+) as c(nombre, dias, hora)
 join public.wf_socios s on s.nombre = c.nombre;

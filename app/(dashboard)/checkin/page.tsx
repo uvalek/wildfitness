@@ -14,7 +14,7 @@ import { SearchInput } from "@/components/SearchInput";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   getSocios,
-  getCheckinsHoy,
+  getCheckinsRecientes,
   registrarCheckin,
   renovarMembresia,
   getPreciosMembresia,
@@ -26,7 +26,14 @@ import {
   formatFecha,
   formatMXN,
   calcularRenovacion,
+  diasAtras,
+  etiquetaDia,
+  toISODate,
+  cn,
 } from "@/lib/utils";
+
+// Cuántos días de historial de visitas mostrar (hoy + 4 anteriores).
+const DIAS_HISTORIAL = 5;
 
 type Estado = "ok" | "suspendida" | "renovado";
 type Resultado = { socio: Socio; estado: Estado } | null;
@@ -49,9 +56,31 @@ export default function CheckinPage() {
 
   useEffect(() => {
     getSocios().then(setSocios);
-    getCheckinsHoy().then(setCheckins);
+    getCheckinsRecientes(DIAS_HISTORIAL).then(setCheckins);
     getPreciosMembresia().then(setPrecios);
   }, []);
+
+  // Agrupa las visitas por día (Hoy, Ayer, …), ordenadas de más reciente a
+  // más antigua. Cada grupo trae su etiqueta, fecha y conteo.
+  const grupos = useMemo(() => {
+    const mapa = new Map<string, Checkin[]>();
+    for (const c of checkins) {
+      const clave = toISODate(new Date(c.fecha)); // día local
+      const lista = mapa.get(clave) ?? [];
+      lista.push(c);
+      mapa.set(clave, lista);
+    }
+    return Array.from(mapa.entries())
+      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+      .map(([clave, visitas]) => ({
+        clave,
+        etiqueta: etiquetaDia(clave),
+        dias: diasAtras(clave),
+        visitas,
+      }));
+  }, [checkins]);
+
+  const totalHoy = grupos.find((g) => g.dias === 0)?.visitas.length ?? 0;
 
   const sugerencias = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -218,49 +247,81 @@ export default function CheckinPage() {
           </Card>
         </div>
 
-        {/* Log de visitas de hoy */}
+        {/* Registro de visitas agrupado por día */}
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-display text-lg font-bold uppercase tracking-wide text-white">
-                Visitas de hoy
+                Registro de visitas
               </h2>
-              <p className="text-xs text-white/50">Registro en tiempo real</p>
+              <p className="text-xs text-white/50">
+                Últimos {DIAS_HISTORIAL} días · {totalHoy} hoy
+              </p>
             </div>
             <span className="rounded-full bg-blood-600/20 px-3 py-1 text-sm font-bold text-blood-400">
               {checkins.length}
             </span>
           </div>
 
-          <div className="max-h-[440px] space-y-2 overflow-y-auto">
-            {checkins.map((c) => (
-              <div
-                key={c.id}
-                className="flex items-center justify-between rounded-lg border border-ink-800 bg-ink-850/60 px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-white">
-                    {c.socioNombre}
-                  </p>
-                  <p className="inline-flex items-center gap-1.5 text-xs text-white/45">
-                    <Clock size={12} />
-                    {formatHora(c.fecha)} h
-                  </p>
+          <div className="max-h-[460px] space-y-4 overflow-y-auto pr-1">
+            {grupos.map((g) => (
+              <div key={g.clave}>
+                {/* Encabezado del día */}
+                <div className="sticky top-0 z-10 -mx-1 mb-2 flex items-center justify-between bg-ink-900/95 px-1 py-1 backdrop-blur">
+                  <div className="flex items-baseline gap-2">
+                    <span
+                      className={cn(
+                        "font-display text-sm font-bold uppercase tracking-wide",
+                        g.dias === 0 ? "text-blood-400" : "text-white/80"
+                      )}
+                    >
+                      {g.etiqueta}
+                    </span>
+                    {g.dias > 1 && (
+                      <span className="text-[11px] text-white/35">
+                        hace {g.dias} días
+                      </span>
+                    )}
+                  </div>
+                  <span className="rounded-full bg-ink-800 px-2 py-0.5 text-[11px] font-semibold text-white/55">
+                    {g.visitas.length}{" "}
+                    {g.visitas.length === 1 ? "visita" : "visitas"}
+                  </span>
                 </div>
-                {c.membresiaVigente ? (
-                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-400">
-                    Acceso ok
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-blood-500/15 px-2.5 py-1 text-xs font-semibold text-blood-400">
-                    Suspendida
-                  </span>
-                )}
+
+                {/* Visitas del día */}
+                <div className="space-y-2">
+                  {g.visitas.map((c) => (
+                    <div
+                      key={c.id}
+                      className="flex items-center justify-between rounded-lg border border-ink-800 bg-ink-850/60 px-3 py-2.5"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-white">
+                          {c.socioNombre}
+                        </p>
+                        <p className="inline-flex items-center gap-1.5 text-xs text-white/45">
+                          <Clock size={12} />
+                          {formatHora(c.fecha)} h
+                        </p>
+                      </div>
+                      {c.membresiaVigente ? (
+                        <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+                          Acceso ok
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-blood-500/15 px-2.5 py-1 text-xs font-semibold text-blood-400">
+                          Suspendida
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
             {checkins.length === 0 && (
               <p className="py-10 text-center text-sm text-white/30">
-                Aún no hay visitas registradas hoy.
+                Aún no hay visitas registradas.
               </p>
             )}
           </div>
