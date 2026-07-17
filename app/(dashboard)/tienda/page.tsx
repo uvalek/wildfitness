@@ -8,11 +8,14 @@ import {
   Minus,
   Package,
   PackagePlus,
+  PlusCircle,
+  Pencil,
   Trash2,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { Modal } from "@/components/Modal";
+import { ConfirmarTexto } from "@/components/ConfirmarTexto";
 import { useRol } from "@/components/RoleProvider";
 import { puedeGestionarInventario } from "@/lib/roles";
 import {
@@ -20,6 +23,8 @@ import {
   getVentasHoy,
   registrarVenta,
   addProducto,
+  updateProducto,
+  agregarStock,
   deleteProducto,
 } from "@/lib/data";
 import type { Producto, Venta, CategoriaProducto } from "@/lib/types";
@@ -43,14 +48,20 @@ export default function TiendaPage() {
   const [error, setError] = useState<string | null>(null);
   const [procesando, setProcesando] = useState(false);
 
-  // Alta de producto
+  // Alta / edición de producto (mismo formulario)
   const [modal, setModal] = useState(false);
+  const [editando, setEditando] = useState<Producto | null>(null);
   const [nNombre, setNNombre] = useState("");
   const [nCategoria, setNCategoria] = useState<CategoriaProducto>("Bebida");
   const [nPrecio, setNPrecio] = useState("");
   const [nStock, setNStock] = useState("");
   const [guardandoProd, setGuardandoProd] = useState(false);
-  const [eliminandoId, setEliminandoId] = useState<string | null>(null);
+
+  // Agregar stock / eliminar (con confirmación por texto)
+  const [addStock, setAddStock] = useState<Producto | null>(null);
+  const [addCantidad, setAddCantidad] = useState("");
+  const [eliminando, setEliminando] = useState<Producto | null>(null);
+  const [accionProc, setAccionProc] = useState(false);
 
   useEffect(() => {
     getProductos().then((p) => {
@@ -60,40 +71,69 @@ export default function TiendaPage() {
     getVentasHoy().then(setVentas);
   }, []);
 
-  async function guardarProducto(e: React.FormEvent) {
-    e.preventDefault();
-    if (!nNombre.trim()) return;
-    setGuardandoProd(true);
-    const nuevo = await addProducto({
-      nombre: nNombre.trim(),
-      categoria: nCategoria,
-      precio: Number(nPrecio) || 0,
-      stock: Number(nStock) || 0,
-    });
-    setProductos((prev) => [...prev, nuevo]);
-    setGuardandoProd(false);
-    setModal(false);
+  function abrirNuevo() {
+    setEditando(null);
     setNNombre("");
     setNCategoria("Bebida");
     setNPrecio("");
     setNStock("");
+    setModal(true);
   }
 
-  async function eliminarProducto(p: Producto) {
-    if (
-      !window.confirm(
-        `¿Eliminar "${p.nombre}" del inventario? Esta acción no se puede deshacer.`
-      )
-    )
-      return;
-    setEliminandoId(p.id);
-    await deleteProducto(p.id);
+  function abrirEditar(p: Producto) {
+    setEditando(p);
+    setNNombre(p.nombre);
+    setNCategoria(p.categoria);
+    setNPrecio(String(p.precio));
+    setNStock(String(p.stock));
+    setModal(true);
+  }
+
+  async function guardarProducto(e: React.FormEvent) {
+    e.preventDefault();
+    if (!nNombre.trim()) return;
+    setGuardandoProd(true);
+    const datos = {
+      nombre: nNombre.trim(),
+      categoria: nCategoria,
+      precio: Number(nPrecio) || 0,
+      stock: Number(nStock) || 0,
+    };
+    if (editando) {
+      const act = await updateProducto(editando.id, datos);
+      setProductos((prev) => prev.map((x) => (x.id === act.id ? act : x)));
+    } else {
+      const nuevo = await addProducto(datos);
+      setProductos((prev) => [...prev, nuevo]);
+    }
+    setGuardandoProd(false);
+    setModal(false);
+    setEditando(null);
+  }
+
+  async function confirmarAddStock() {
+    if (!addStock) return;
+    const n = Number(addCantidad);
+    if (!Number.isFinite(n) || n <= 0) return;
+    setAccionProc(true);
+    const act = await agregarStock(addStock.id, n);
+    setProductos((prev) => prev.map((x) => (x.id === act.id ? act : x)));
+    setAccionProc(false);
+    setAddStock(null);
+    setAddCantidad("");
+  }
+
+  async function confirmarEliminar() {
+    if (!eliminando) return;
+    setAccionProc(true);
+    await deleteProducto(eliminando.id);
     setProductos((prev) => {
-      const rest = prev.filter((x) => x.id !== p.id);
-      if (productoId === p.id) setProductoId(rest[0]?.id ?? "");
+      const rest = prev.filter((x) => x.id !== eliminando.id);
+      if (productoId === eliminando.id) setProductoId(rest[0]?.id ?? "");
       return rest;
     });
-    setEliminandoId(null);
+    setAccionProc(false);
+    setEliminando(null);
   }
 
   const seleccionado = useMemo(
@@ -134,7 +174,7 @@ export default function TiendaPage() {
         accion={
           gestionar ? (
             <button
-              onClick={() => setModal(true)}
+              onClick={abrirNuevo}
               className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110"
             >
               <PackagePlus size={18} />
@@ -200,15 +240,33 @@ export default function TiendaPage() {
                         )}
                       </td>
                       {gestionar && (
-                        <td className="px-5 py-3.5 text-right">
-                          <button
-                            onClick={() => eliminarProducto(p)}
-                            disabled={eliminandoId === p.id}
-                            title="Eliminar producto"
-                            className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-blood-500/50 hover:bg-blood-500/10 hover:text-blood-400 disabled:opacity-50"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => abrirEditar(p)}
+                              title="Editar producto"
+                              className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-white/30 hover:bg-ink-800 hover:text-white"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setAddStock(p);
+                                setAddCantidad("");
+                              }}
+                              title="Agregar stock"
+                              className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-400"
+                            >
+                              <PlusCircle size={15} />
+                            </button>
+                            <button
+                              onClick={() => setEliminando(p)}
+                              title="Eliminar producto"
+                              className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-blood-500/50 hover:bg-blood-500/10 hover:text-blood-400"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -378,11 +436,11 @@ export default function TiendaPage() {
         </div>
       </Card>
 
-      {/* Modal nuevo producto */}
+      {/* Modal nuevo / editar producto */}
       <Modal
         abierto={modal}
         onClose={() => setModal(false)}
-        titulo="Nuevo producto"
+        titulo={editando ? "Editar producto" : "Nuevo producto"}
       >
         <form onSubmit={guardarProducto} className="space-y-4">
           <label className="block">
@@ -464,11 +522,83 @@ export default function TiendaPage() {
               disabled={guardandoProd}
               className="rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
             >
-              {guardandoProd ? "Guardando…" : "Agregar producto"}
+              {guardandoProd
+                ? "Guardando…"
+                : editando
+                  ? "Guardar cambios"
+                  : "Agregar producto"}
             </button>
           </div>
         </form>
       </Modal>
+
+      {/* Agregar stock (confirmación por texto) */}
+      <ConfirmarTexto
+        abierto={addStock !== null}
+        onClose={() => setAddStock(null)}
+        titulo="Agregar stock"
+        palabra={addStock?.nombre ?? ""}
+        etiquetaBoton="Agregar stock"
+        procesando={accionProc}
+        bloquear={!(Number(addCantidad) > 0)}
+        onConfirm={confirmarAddStock}
+        descripcion={
+          addStock ? (
+            <p>
+              Agregar unidades a{" "}
+              <span className="font-semibold text-white">
+                {addStock.nombre}
+              </span>{" "}
+              (stock actual: {addStock.stock}).
+            </p>
+          ) : undefined
+        }
+      >
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50">
+            Unidades a agregar
+          </span>
+          <input
+            type="number"
+            min={1}
+            step="1"
+            value={addCantidad}
+            onChange={(e) => setAddCantidad(e.target.value)}
+            autoFocus
+            placeholder="0"
+            className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+          />
+          {addStock && Number(addCantidad) > 0 && (
+            <p className="mt-1.5 text-xs text-emerald-400">
+              Nuevo stock: {addStock.stock + Number(addCantidad)}
+            </p>
+          )}
+        </label>
+      </ConfirmarTexto>
+
+      {/* Eliminar producto (confirmación por texto) */}
+      <ConfirmarTexto
+        abierto={eliminando !== null}
+        onClose={() => setEliminando(null)}
+        titulo="Eliminar producto"
+        palabra={eliminando?.nombre ?? ""}
+        etiquetaBoton="Eliminar definitivamente"
+        peligro
+        procesando={accionProc}
+        onConfirm={confirmarEliminar}
+        descripcion={
+          eliminando ? (
+            <p>
+              Vas a eliminar{" "}
+              <span className="font-semibold text-white">
+                {eliminando.nombre}
+              </span>{" "}
+              del inventario de forma permanente. El historial de ventas se
+              conserva.
+            </p>
+          ) : undefined
+        }
+      />
     </>
   );
 }

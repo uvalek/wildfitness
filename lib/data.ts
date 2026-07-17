@@ -281,6 +281,42 @@ export async function addProducto(input: {
   return toProducto(data as ProductoRow);
 }
 
+export async function updateProducto(
+  id: string,
+  patch: Partial<{
+    nombre: string;
+    categoria: Producto["categoria"];
+    precio: number;
+    stock: number;
+  }>
+): Promise<Producto> {
+  const { data, error } = await supabase
+    .from("wf_productos")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) fail("updateProducto", error);
+  return toProducto(data as ProductoRow);
+}
+
+/** Suma unidades al stock de un producto (lectura + escritura). */
+export async function agregarStock(
+  id: string,
+  cantidad: number
+): Promise<Producto> {
+  if (cantidad <= 0) throw new Error("La cantidad debe ser mayor a cero");
+  const { data: cur, error: e1 } = await supabase
+    .from("wf_productos")
+    .select("stock")
+    .eq("id", id)
+    .single();
+  if (e1) fail("agregarStock:leer", e1);
+  return updateProducto(id, {
+    stock: (cur as { stock: number }).stock + cantidad,
+  });
+}
+
 /** Elimina un producto. El histórico de ventas se conserva (ON DELETE SET NULL). */
 export async function deleteProducto(id: string): Promise<void> {
   const { error } = await supabase.from("wf_productos").delete().eq("id", id);
