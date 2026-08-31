@@ -7,6 +7,7 @@ import { Card } from "@/components/Card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SearchInput } from "@/components/SearchInput";
 import { Modal } from "@/components/Modal";
+import { RegistroHuella } from "@/components/RegistroHuella";
 import {
   getSocios,
   addSocio,
@@ -65,6 +66,7 @@ export default function SociosPage() {
 
   const vencimiento = sumarDias(inicio, DURACION_MEMBRESIA_DIAS[tipo]);
   const [renovandoId, setRenovandoId] = useState<string | null>(null);
+  const [huellaDe, setHuellaDe] = useState<Socio | null>(null);
 
   async function renovar(socio: Socio) {
     setRenovandoId(socio.id);
@@ -170,12 +172,11 @@ export default function SociosPage() {
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                    {/* Pendiente: se habilita al conectar el lector de huella. */}
                     <button
                       type="button"
-                      disabled
-                      title="Disponible al conectar el lector de huella"
-                      className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-ink-700 px-3 py-1.5 text-xs font-semibold text-white/30"
+                      onClick={() => setHuellaDe(s)}
+                      title="Registrar o actualizar huella"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-ink-700 px-3 py-1.5 text-xs font-semibold text-white/50 transition hover:border-accent-500/50 hover:bg-accent-500/10 hover:text-accent-400"
                     >
                       <Fingerprint size={13} />
                       Huella
@@ -213,6 +214,8 @@ export default function SociosPage() {
       </Card>
 
       {/* Modal nuevo socio */}
+      <RegistroHuella socio={huellaDe} onClose={() => setHuellaDe(null)} />
+
       <Modal abierto={modal} onClose={() => setModal(false)} titulo="Nuevo socio">
         <form onSubmit={guardar} className="space-y-4">
           <Campo label="Nombre completo">
