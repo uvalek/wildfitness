@@ -185,6 +185,94 @@ export default function TiendaPage() {
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* Punto de venta */}
+        <Card>
+          <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold uppercase tracking-wide text-white">
+            <ShoppingCart size={18} className="text-accent-500" />
+            Punto de venta
+          </h2>
+
+          <form onSubmit={vender} className="space-y-4">
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50">
+                Producto
+              </span>
+              <select
+                value={productoId}
+                onChange={(e) => {
+                  setProductoId(e.target.value);
+                  setError(null);
+                }}
+                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
+              >
+                {productos.map((p) => (
+                  <option key={p.id} value={p.id} disabled={p.stock === 0}>
+                    {p.nombre} — {formatMXN(p.precio)}
+                    {p.stock === 0 ? " (agotado)" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50">
+                Cantidad
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCantidad((c) => Math.max(1, c - 1))}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-ink-700 bg-ink-850 text-white transition hover:bg-ink-800"
+                >
+                  <Minus size={16} />
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  value={cantidad}
+                  onChange={(e) =>
+                    setCantidad(Math.max(1, Number(e.target.value) || 1))
+                  }
+                  className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-center text-sm text-white outline-none focus:border-accent-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setCantidad((c) => c + 1)}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-ink-700 bg-ink-850 text-white transition hover:bg-ink-800"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              {seleccionado && (
+                <p className="mt-1.5 text-xs text-white/40">
+                  Stock disponible: {seleccionado.stock}
+                </p>
+              )}
+            </label>
+
+            <div className="flex items-center justify-between rounded-lg border border-ink-800 bg-ink-850/60 px-3 py-3">
+              <span className="text-sm text-white/60">Total</span>
+              <span className="font-display text-xl font-bold text-white">
+                {formatMXN(totalVenta)}
+              </span>
+            </div>
+
+            {error && (
+              <p className="rounded-lg bg-danger-500/10 px-3 py-2 text-xs text-danger-400">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={procesando || !seleccionado || seleccionado.stock === 0}
+              className="w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
+            >
+              {procesando ? "Registrando…" : "Registrar venta"}
+            </button>
+          </form>
+        </Card>
+
         {/* Inventario */}
         <Card className="xl:col-span-2 p-0">
           <div className="flex items-center justify-between px-5 py-4">
@@ -285,94 +373,6 @@ export default function TiendaPage() {
               </tbody>
             </table>
           </div>
-        </Card>
-
-        {/* Punto de venta */}
-        <Card>
-          <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold uppercase tracking-wide text-white">
-            <ShoppingCart size={18} className="text-accent-500" />
-            Punto de venta
-          </h2>
-
-          <form onSubmit={vender} className="space-y-4">
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50">
-                Producto
-              </span>
-              <select
-                value={productoId}
-                onChange={(e) => {
-                  setProductoId(e.target.value);
-                  setError(null);
-                }}
-                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
-              >
-                {productos.map((p) => (
-                  <option key={p.id} value={p.id} disabled={p.stock === 0}>
-                    {p.nombre} — {formatMXN(p.precio)}
-                    {p.stock === 0 ? " (agotado)" : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50">
-                Cantidad
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCantidad((c) => Math.max(1, c - 1))}
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-ink-700 bg-ink-850 text-white transition hover:bg-ink-800"
-                >
-                  <Minus size={16} />
-                </button>
-                <input
-                  type="number"
-                  min={1}
-                  value={cantidad}
-                  onChange={(e) =>
-                    setCantidad(Math.max(1, Number(e.target.value) || 1))
-                  }
-                  className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-center text-sm text-white outline-none focus:border-accent-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setCantidad((c) => c + 1)}
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-ink-700 bg-ink-850 text-white transition hover:bg-ink-800"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              {seleccionado && (
-                <p className="mt-1.5 text-xs text-white/40">
-                  Stock disponible: {seleccionado.stock}
-                </p>
-              )}
-            </label>
-
-            <div className="flex items-center justify-between rounded-lg border border-ink-800 bg-ink-850/60 px-3 py-3">
-              <span className="text-sm text-white/60">Total</span>
-              <span className="font-display text-xl font-bold text-white">
-                {formatMXN(totalVenta)}
-              </span>
-            </div>
-
-            {error && (
-              <p className="rounded-lg bg-danger-500/10 px-3 py-2 text-xs text-danger-400">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={procesando || !seleccionado || seleccionado.stock === 0}
-              className="w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
-            >
-              {procesando ? "Registrando…" : "Registrar venta"}
-            </button>
-          </form>
         </Card>
       </div>
 
