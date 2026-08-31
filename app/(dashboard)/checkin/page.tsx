@@ -7,11 +7,14 @@ import {
   AlertTriangle,
   Clock,
   RefreshCw,
+  Search,
+  Fingerprint,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { SearchInput } from "@/components/SearchInput";
 import { StatusBadge } from "@/components/StatusBadge";
+import { LectorHuella } from "@/components/LectorHuella";
 import {
   getSocios,
   getCheckinsRecientes,
@@ -35,6 +38,9 @@ import {
 // Cuántos días de historial de visitas mostrar (hoy + 4 anteriores).
 const DIAS_HISTORIAL = 5;
 
+/** Cómo se identifica al socio: buscándolo por nombre o con el lector. */
+type Modo = "nombre" | "huella";
+
 type Estado = "ok" | "suspendida" | "renovado";
 type Resultado = { socio: Socio; estado: Estado } | null;
 
@@ -50,6 +56,7 @@ export default function CheckinPage() {
   const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [precios, setPrecios] =
     useState<Record<TipoMembresia, number>>(PRECIOS_DEFAULT);
+  const [modo, setModo] = useState<Modo>("nombre");
   const [busqueda, setBusqueda] = useState("");
   const [resultado, setResultado] = useState<Resultado>(null);
   const [renovando, setRenovando] = useState(false);
@@ -133,9 +140,40 @@ export default function CheckinPage() {
         {/* Panel de registro */}
         <div className="space-y-4">
           <Card>
-            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-white/50">
-              Buscar socio
-            </label>
+            {/* Método de identificación */}
+            <div className="mb-4 flex gap-1 rounded-lg bg-ink-850 p-1">
+              {(
+                [
+                  { id: "nombre", label: "Por nombre", icon: Search },
+                  { id: "huella", label: "Huella digital", icon: Fingerprint },
+                ] as const
+              ).map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setModo(id);
+                    setResultado(null);
+                  }}
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide transition",
+                    modo === id
+                      ? "bg-accent-600 text-white shadow-glow"
+                      : "text-white/50 hover:text-white"
+                  )}
+                >
+                  <Icon size={15} />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {modo === "huella" ? (
+              <LectorHuella
+                socios={socios}
+                onIdentificado={seleccionar}
+                onLecturaFallida={() => setResultado(null)}
+              />
+            ) : (
             <div className="relative">
               <SearchInput
                 value={busqueda}
@@ -162,10 +200,11 @@ export default function CheckinPage() {
                 </div>
               )}
             </div>
+            )}
 
             {/* Resultado del check-in */}
             <div className="mt-4">
-              {!resultado && (
+              {!resultado && modo === "nombre" && (
                 <div className="grid place-items-center gap-2 rounded-xl border border-dashed border-ink-700 py-10 text-center">
                   <ScanLine size={32} className="text-white/25" />
                   <p className="text-sm text-white/40">

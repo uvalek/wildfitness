@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { UserPlus, Phone, RefreshCw } from "lucide-react";
+import { UserPlus, Phone, RefreshCw, Fingerprint } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -169,6 +169,17 @@ export default function SociosPage() {
                     <StatusBadge estatus={calcularEstatus(s.fechaVencimiento)} />
                   </td>
                   <td className="px-5 py-3.5 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                    {/* Pendiente: se habilita al conectar el lector de huella. */}
+                    <button
+                      type="button"
+                      disabled
+                      title="Disponible al conectar el lector de huella"
+                      className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-ink-700 px-3 py-1.5 text-xs font-semibold text-white/30"
+                    >
+                      <Fingerprint size={13} />
+                      Huella
+                    </button>
                     {calcularEstatus(s.fechaVencimiento) !== "Activa" && (
                       <button
                         onClick={() => renovar(s)}
@@ -182,6 +193,7 @@ export default function SociosPage() {
                         {renovandoId === s.id ? "Renovando…" : "Renovar"}
                       </button>
                     )}
+                    </div>
                   </td>
                 </tr>
               ))}
