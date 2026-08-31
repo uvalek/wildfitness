@@ -44,13 +44,13 @@ export default function IngresosPage() {
           titulo="Total del mes"
           valor={resumen ? formatMXN(resumen.totalMes) : "—"}
           icon={Wallet}
-          acento="blood"
+          acento="accent"
         />
         <KpiCard
           titulo="Membresías"
           valor={resumen ? formatMXN(resumen.totalMembresias) : "—"}
           icon={CreditCard}
-          acento="emerald"
+          acento="violet"
         />
         <KpiCard
           titulo="Tienda"
@@ -97,7 +97,7 @@ export default function IngresosPage() {
                 <div className="h-2 overflow-hidden rounded-full bg-ink-800">
                   <div
                     className={cn(
-                      "h-full rounded-full bg-gradient-to-r from-blood-500 to-blood-700"
+                      "h-full rounded-full bg-gradient-to-r from-accent-600 to-accent-800"
                     )}
                     style={{ width: `${(d.monto / maxMonto) * 100}%` }}
                   />
@@ -118,7 +118,7 @@ export default function IngresosPage() {
                 <span className="font-display text-sm font-bold uppercase tracking-wide text-white/70">
                   Total
                 </span>
-                <span className="font-display text-xl font-bold text-blood-400">
+                <span className="font-display text-xl font-bold text-accent-400">
                   {formatMXN(resumen.totalMes)}
                 </span>
               </div>

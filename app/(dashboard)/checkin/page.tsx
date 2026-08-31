@@ -151,7 +151,7 @@ export default function CheckinPage() {
                       className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm text-white transition hover:bg-ink-800"
                     >
                       <span className="flex items-center gap-2.5">
-                        <span className="rounded-md bg-ink-800 px-2 py-0.5 font-mono text-xs font-semibold text-blood-400">
+                        <span className="rounded-md bg-ink-800 px-2 py-0.5 font-mono text-xs font-semibold text-accent-400">
                           #{s.folio}
                         </span>
                         {s.nombre}
@@ -196,14 +196,14 @@ export default function CheckinPage() {
 
               {/* Membresía suspendida: se ofrece renovar en el mostrador */}
               {resultado?.estado === "suspendida" && (
-                <div className="rounded-xl border border-blood-500/40 bg-blood-500/10 p-4">
+                <div className="rounded-xl border border-danger-500/40 bg-danger-500/10 p-4">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-0.5 shrink-0 text-blood-400" />
+                    <AlertTriangle className="mt-0.5 shrink-0 text-danger-400" />
                     <div>
-                      <p className="font-display text-lg font-bold uppercase tracking-wide text-blood-400">
+                      <p className="font-display text-lg font-bold uppercase tracking-wide text-danger-400">
                         Membresía suspendida
                       </p>
-                      <p className="text-sm text-blood-200/70">
+                      <p className="text-sm text-danger-200/70">
                         Socio #{resultado.socio.folio} · La membresía venció el{" "}
                         {formatFecha(resultado.socio.fechaVencimiento)}. Renueva
                         para reactivar el acceso.
@@ -258,7 +258,7 @@ export default function CheckinPage() {
                 Últimos {DIAS_HISTORIAL} días · {totalHoy} hoy
               </p>
             </div>
-            <span className="rounded-full bg-blood-600/20 px-3 py-1 text-sm font-bold text-blood-400">
+            <span className="rounded-full bg-accent-600/20 px-3 py-1 text-sm font-bold text-accent-400">
               {checkins.length}
             </span>
           </div>
@@ -272,7 +272,7 @@ export default function CheckinPage() {
                     <span
                       className={cn(
                         "font-display text-sm font-bold uppercase tracking-wide",
-                        g.dias === 0 ? "text-blood-400" : "text-white/80"
+                        g.dias === 0 ? "text-accent-400" : "text-white/80"
                       )}
                     >
                       {g.etiqueta}
@@ -310,7 +310,7 @@ export default function CheckinPage() {
                           Acceso ok
                         </span>
                       ) : (
-                        <span className="rounded-full bg-blood-500/15 px-2.5 py-1 text-xs font-semibold text-blood-400">
+                        <span className="rounded-full bg-danger-500/15 px-2.5 py-1 text-xs font-semibold text-danger-400">
                           Suspendida
                         </span>
                       )}

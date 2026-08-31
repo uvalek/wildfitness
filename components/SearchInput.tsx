@@ -12,7 +12,7 @@ export function SearchInput({
   placeholder?: string;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-3 focus-within:border-blood-500">
+    <div className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-3 focus-within:border-accent-500">
       <Search size={18} className="text-white/40" />
       <input
         value={value}

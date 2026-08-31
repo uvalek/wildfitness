@@ -53,8 +53,8 @@ export default function LoginPage() {
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-ink-950 px-4">
       {/* Fondo energético */}
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
-      <div className="pointer-events-none absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-blood-600/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-blood-700/10 blur-3xl" />
+      <div className="pointer-events-none absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-accent-600/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-accent-700/10 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 flex justify-center">
@@ -74,7 +74,7 @@ export default function LoginPage() {
               <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50">
                 Correo
               </label>
-              <div className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-3 focus-within:border-blood-500">
+              <div className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-3 focus-within:border-accent-500">
                 <User size={18} className="text-white/40" />
                 <input
                   type="email"
@@ -91,7 +91,7 @@ export default function LoginPage() {
               <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50">
                 Contraseña
               </label>
-              <div className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-3 focus-within:border-blood-500">
+              <div className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-3 focus-within:border-accent-500">
                 <Lock size={18} className="text-white/40" />
                 <input
                   type="password"
@@ -106,7 +106,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-blood-500/40 bg-blood-500/10 px-3 py-2.5 text-sm text-blood-400">
+              <div className="flex items-center gap-2 rounded-lg border border-danger-500/40 bg-danger-500/10 px-3 py-2.5 text-sm text-danger-400">
                 <AlertCircle size={16} className="shrink-0" />
                 {error}
               </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={cargando}
-              className="group flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
+              className="group flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
             >
               {cargando ? "Entrando…" : "Entrar"}
               {!cargando && (
@@ -129,7 +129,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-white/30">
-          Wild Fitness · Panel de gestión
+          Olimpo Gym · Panel de gestión
         </p>
       </div>
     </main>

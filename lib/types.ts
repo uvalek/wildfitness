@@ -1,4 +1,4 @@
-// Tipos centrales del dominio Wild Fitness.
+// Tipos centrales del dominio Olimpo Gym.
 // Diseñados para mapear 1:1 a tablas de Supabase más adelante.
 
 export type TipoMembresia = "Semanal" | "Quincenal" | "Mensual" | "Anual";

@@ -144,7 +144,7 @@ export default function SeguridadPage() {
               <button
                 onClick={desactivar}
                 disabled={procesando}
-                className="mt-4 rounded-lg border border-ink-700 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:border-blood-500/50 hover:bg-blood-500/10 hover:text-blood-400 disabled:opacity-50"
+                className="mt-4 rounded-lg border border-ink-700 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:border-danger-500/50 hover:bg-danger-500/10 hover:text-danger-400 disabled:opacity-50"
               >
                 Desactivar 2FA
               </button>
@@ -169,7 +169,7 @@ export default function SeguridadPage() {
               <button
                 onClick={activar}
                 disabled={procesando}
-                className="mt-4 flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
+                className="mt-4 flex items-center gap-2 rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
               >
                 <ShieldCheck size={18} />
                 {procesando ? "Generando…" : "Activar 2FA"}
@@ -182,7 +182,7 @@ export default function SeguridadPage() {
             <div>
               <ol className="mb-4 space-y-1.5 text-sm text-white/60">
                 <li className="flex gap-2">
-                  <Smartphone size={16} className="mt-0.5 shrink-0 text-blood-400" />
+                  <Smartphone size={16} className="mt-0.5 shrink-0 text-accent-400" />
                   1. Abre Authy y escanea este código QR.
                 </li>
                 <li className="pl-6">
@@ -230,14 +230,14 @@ export default function SeguridadPage() {
                       inputMode="numeric"
                       autoFocus
                       placeholder="000000"
-                      className="w-full rounded-lg border border-ink-700 bg-ink-850 py-2.5 text-center font-mono text-xl tracking-[0.4em] text-white outline-none focus:border-blood-500"
+                      className="w-full rounded-lg border border-ink-700 bg-ink-850 py-2.5 text-center font-mono text-xl tracking-[0.4em] text-white outline-none focus:border-accent-500"
                     />
                     {error && <ErrorMsg>{error}</ErrorMsg>}
                     <div className="flex gap-2">
                       <button
                         type="submit"
                         disabled={procesando || code.length !== 6}
-                        className="flex-1 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
+                        className="flex-1 rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
                       >
                         {procesando ? "Confirmando…" : "Confirmar"}
                       </button>
@@ -266,7 +266,7 @@ export default function SeguridadPage() {
 
 function ErrorMsg({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-3 flex items-center gap-2 rounded-lg border border-blood-500/40 bg-blood-500/10 px-3 py-2.5 text-sm text-blood-400">
+    <div className="mt-3 flex items-center gap-2 rounded-lg border border-danger-500/40 bg-danger-500/10 px-3 py-2.5 text-sm text-danger-400">
       <AlertCircle size={16} className="shrink-0" />
       {children}
     </div>

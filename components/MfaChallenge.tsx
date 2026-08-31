@@ -62,7 +62,7 @@ export function MfaChallenge({ onSuccess }: { onSuccess: () => void }) {
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-ink-950 px-4">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
-      <div className="pointer-events-none absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-blood-600/20 blur-3xl" />
+      <div className="pointer-events-none absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-accent-600/20 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 flex justify-center">
@@ -71,7 +71,7 @@ export function MfaChallenge({ onSuccess }: { onSuccess: () => void }) {
 
         <div className="rounded-2xl border border-ink-700/60 bg-ink-900/80 p-8 shadow-2xl backdrop-blur">
           <div className="mb-4 flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-blood-600/20 text-blood-400">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent-600/20 text-accent-400">
               <ShieldCheck size={22} />
             </span>
             <div>
@@ -95,11 +95,11 @@ export function MfaChallenge({ onSuccess }: { onSuccess: () => void }) {
               inputMode="numeric"
               autoFocus
               placeholder="000000"
-              className="w-full rounded-lg border border-ink-700 bg-ink-850 py-3 text-center font-mono text-2xl tracking-[0.5em] text-white outline-none focus:border-blood-500"
+              className="w-full rounded-lg border border-ink-700 bg-ink-850 py-3 text-center font-mono text-2xl tracking-[0.5em] text-white outline-none focus:border-accent-500"
             />
 
             {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-blood-500/40 bg-blood-500/10 px-3 py-2.5 text-sm text-blood-400">
+              <div className="flex items-center gap-2 rounded-lg border border-danger-500/40 bg-danger-500/10 px-3 py-2.5 text-sm text-danger-400">
                 <AlertCircle size={16} className="shrink-0" />
                 {error}
               </div>
@@ -108,7 +108,7 @@ export function MfaChallenge({ onSuccess }: { onSuccess: () => void }) {
             <button
               type="submit"
               disabled={cargando || code.length !== 6}
-              className="w-full rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
+              className="w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
             >
               {cargando ? "Verificando…" : "Verificar"}
             </button>

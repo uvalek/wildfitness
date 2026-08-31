@@ -19,8 +19,8 @@ export function IngresosChart({ data }: { data: IngresoMensual[] }) {
       <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <defs>
           <linearGradient id="gradMembresias" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ff4d4d" />
-            <stop offset="100%" stopColor="#b80000" />
+            <stop offset="0%" stopColor="#1fd677" />
+            <stop offset="100%" stopColor="#00773b" />
           </linearGradient>
           <linearGradient id="gradTienda" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#5b5b66" />

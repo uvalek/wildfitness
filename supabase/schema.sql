@@ -1,6 +1,8 @@
 -- ============================================================
---  Wild Fitness — esquema de base de datos (Supabase / Postgres)
+--  Olimpo Gym — esquema de base de datos (Supabase / Postgres)
 --  Aplicado al proyecto SuperCerebro. Tablas con prefijo wf_.
+--  El prefijo wf_ se conserva del demo original a proposito: el rebrand
+--  a Olimpo Gym es solo visual y reutiliza la MISMA base de datos.
 -- ============================================================
 
 create table if not exists public.wf_precios_membresia (

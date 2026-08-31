@@ -63,7 +63,7 @@ export function ConfirmarTexto({
             onChange={(e) => setTexto(e.target.value)}
             autoFocus
             placeholder={palabra}
-            className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500"
+            className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
           />
         </div>
 
@@ -80,10 +80,10 @@ export function ConfirmarTexto({
             onClick={onConfirm}
             disabled={!coincide || bloquear || procesando}
             className={cn(
-              "rounded-lg px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40",
+              "rounded-lg px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40",
               peligro
-                ? "bg-gradient-to-r from-blood-500 to-blood-700"
-                : "bg-gradient-to-r from-emerald-600 to-emerald-700"
+                ? "bg-gradient-to-r from-danger-500 to-danger-700 shadow-glow-danger"
+                : "bg-gradient-to-r from-accent-600 to-accent-800 shadow-glow"
             )}
           >
             {procesando ? "Procesando…" : etiquetaBoton}

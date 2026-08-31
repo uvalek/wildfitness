@@ -1,5 +1,5 @@
 -- ============================================================
---  Wild Fitness — datos semilla (fechas relativas a CURRENT_DATE)
+--  Olimpo Gym — datos semilla (fechas relativas a CURRENT_DATE)
 --  Ejecutar sobre el esquema de schema.sql. Reejecutable: limpia antes.
 -- ============================================================
 

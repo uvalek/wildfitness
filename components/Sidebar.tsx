@@ -64,7 +64,7 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
                 activo
-                  ? "bg-gradient-to-r from-blood-600/20 to-transparent text-white"
+                  ? "bg-gradient-to-r from-accent-600/20 to-transparent text-white"
                   : "text-white/55 hover:bg-ink-800 hover:text-white"
               )}
             >
@@ -72,7 +72,7 @@ export function Sidebar() {
                 className={cn(
                   "grid h-8 w-8 place-items-center rounded-md transition",
                   activo
-                    ? "bg-blood-600 text-white shadow-glow"
+                    ? "bg-accent-600 text-white shadow-glow"
                     : "bg-ink-800 text-white/60 group-hover:text-white"
                 )}
               >
@@ -92,7 +92,7 @@ export function Sidebar() {
                 Sesión
               </p>
               {rol && (
-                <span className="rounded bg-blood-600/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blood-400">
+                <span className="rounded bg-accent-600/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-400">
                   {ROL_LABEL[rol]}
                 </span>
               )}

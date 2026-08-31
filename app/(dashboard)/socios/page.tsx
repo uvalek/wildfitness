@@ -106,7 +106,7 @@ export default function SociosPage() {
         accion={
           <button
             onClick={() => setModal(true)}
-            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110"
+            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110"
           >
             <UserPlus size={18} />
             Nuevo socio
@@ -141,7 +141,7 @@ export default function SociosPage() {
               {filtrados.map((s) => (
                 <tr key={s.id} className="transition hover:bg-ink-850/50">
                   <td className="px-5 py-3.5">
-                    <span className="rounded-md bg-ink-800 px-2 py-1 font-mono text-xs font-semibold text-blood-400">
+                    <span className="rounded-md bg-ink-800 px-2 py-1 font-mono text-xs font-semibold text-accent-400">
                       #{s.folio}
                     </span>
                   </td>
@@ -210,7 +210,7 @@ export default function SociosPage() {
               required
               autoFocus
               placeholder="Ej. Juan Pérez López"
-              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500"
+              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
             />
           </Campo>
 
@@ -219,7 +219,7 @@ export default function SociosPage() {
               value={telefono}
               onChange={(e) => setTelefono(e.target.value)}
               placeholder="55 1234 5678"
-              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500"
+              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
             />
           </Campo>
 
@@ -228,7 +228,7 @@ export default function SociosPage() {
               <select
                 value={tipo}
                 onChange={(e) => setTipo(e.target.value as TipoMembresia)}
-                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500"
+                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
               >
                 {TIPOS.map((t) => (
                   <option key={t} value={t}>
@@ -243,7 +243,7 @@ export default function SociosPage() {
                 type="date"
                 value={inicio}
                 onChange={(e) => setInicio(e.target.value)}
-                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500 [color-scheme:dark]"
+                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500 [color-scheme:dark]"
               />
             </Campo>
           </div>
@@ -267,7 +267,7 @@ export default function SociosPage() {
             <button
               type="submit"
               disabled={guardando}
-              className="rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
+              className="rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
             >
               {guardando ? "Guardando…" : "Agregar socio"}
             </button>
