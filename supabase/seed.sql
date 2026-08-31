@@ -13,7 +13,8 @@ delete from public.wf_productos;
 alter sequence public.wf_socios_folio_seq restart with 1001;
 
 insert into public.wf_precios_membresia (tipo, precio) values
-  ('Semanal', 100), ('Quincenal', 180), ('Mensual', 300), ('Anual', 3000)
+  ('Visita', 75), ('Semanal', 100), ('Quincenal', 180), ('Mensual', 300),
+  ('Anual', 3000)
 on conflict (tipo) do update set precio = excluded.precio;
 
 -- Roles de acceso (busca los usuarios por correo en Supabase Auth).

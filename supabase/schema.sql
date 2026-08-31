@@ -6,7 +6,8 @@
 -- ============================================================
 
 create table if not exists public.wf_precios_membresia (
-  tipo   text primary key check (tipo in ('Semanal','Quincenal','Mensual','Anual')),
+  -- 'Visita' es un pase de un día; los demás son membresías recurrentes.
+  tipo   text primary key check (tipo in ('Visita','Semanal','Quincenal','Mensual','Anual')),
   precio numeric(10,2) not null
 );
 

@@ -11,6 +11,7 @@ import type { ResumenIngresos, TipoMembresia } from "@/lib/types";
 import { formatMXN, cn } from "@/lib/utils";
 
 const PRECIOS_DEFAULT: Record<TipoMembresia, number> = {
+  Visita: 75,
   Semanal: 100,
   Quincenal: 180,
   Mensual: 300,

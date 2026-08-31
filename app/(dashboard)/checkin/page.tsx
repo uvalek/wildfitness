@@ -15,16 +15,21 @@ import { Card } from "@/components/Card";
 import { SearchInput } from "@/components/SearchInput";
 import { StatusBadge } from "@/components/StatusBadge";
 import { LectorHuella } from "@/components/LectorHuella";
+import { CobroVisita } from "@/components/CobroVisita";
 import {
   getSocios,
   getCheckinsRecientes,
   registrarCheckin,
+  registrarVisitaPagada,
   renovarMembresia,
   getPreciosMembresia,
 } from "@/lib/data";
 import type { Socio, Checkin, TipoMembresia } from "@/lib/types";
 import {
   calcularEstatus,
+  estatusSocio,
+  esVisita,
+  visitaPagadaHoy,
   formatHora,
   formatFecha,
   formatMXN,
@@ -41,10 +46,11 @@ const DIAS_HISTORIAL = 5;
 /** Cómo se identifica al socio: buscándolo por nombre o con el lector. */
 type Modo = "nombre" | "huella";
 
-type Estado = "ok" | "suspendida" | "renovado";
+type Estado = "ok" | "suspendida" | "renovado" | "visita";
 type Resultado = { socio: Socio; estado: Estado } | null;
 
 const PRECIOS_DEFAULT: Record<TipoMembresia, number> = {
+  Visita: 75,
   Semanal: 100,
   Quincenal: 180,
   Mensual: 300,
@@ -60,6 +66,8 @@ export default function CheckinPage() {
   const [busqueda, setBusqueda] = useState("");
   const [resultado, setResultado] = useState<Resultado>(null);
   const [renovando, setRenovando] = useState(false);
+  const [cobroVisita, setCobroVisita] = useState<Socio | null>(null);
+  const [cobrando, setCobrando] = useState(false);
 
   useEffect(() => {
     getSocios().then(setSocios);
@@ -92,16 +100,27 @@ export default function CheckinPage() {
   const sugerencias = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
     if (!q) return [];
+    const digitos = q.replace(/\D/g, "");
     return socios
       .filter(
         (s) =>
-          s.nombre.toLowerCase().includes(q) || String(s.folio).includes(q)
+          s.nombre.toLowerCase().includes(q) ||
+          String(s.folio).includes(q) ||
+          (digitos.length >= 3 &&
+            s.telefono.replace(/\D/g, "").includes(digitos))
       )
       .slice(0, 6);
   }, [socios, busqueda]);
 
   async function seleccionar(socio: Socio) {
     setBusqueda("");
+    // Visitante: paga cada vez. Si aún no cubrió el pase de hoy, primero se
+    // confirma el cobro; la entrada se registra hasta que el pago se acepta.
+    if (esVisita(socio.tipoMembresia)) {
+      setResultado(null);
+      setCobroVisita(socio);
+      return;
+    }
     const estatus = calcularEstatus(socio.fechaVencimiento);
     // Membresía suspendida: no registra la visita todavía; se ofrece renovar.
     if (estatus === "Suspendida") {
@@ -111,6 +130,28 @@ export default function CheckinPage() {
     const chk = await registrarCheckin(socio.id);
     setCheckins((prev) => [chk, ...prev]);
     setResultado({ socio, estado: "ok" });
+  }
+
+  async function confirmarCobroVisita() {
+    if (!cobroVisita) return;
+    setCobrando(true);
+    if (visitaPagadaHoy(cobroVisita)) {
+      // Reingreso el mismo día: ya pagó, solo se deja constancia de la entrada.
+      const chk = await registrarCheckin(cobroVisita.id);
+      setCheckins((prev) => [chk, ...prev]);
+      setResultado({ socio: cobroVisita, estado: "ok" });
+    } else {
+      const res = await registrarVisitaPagada(cobroVisita.id);
+      if (res) {
+        setSocios((prev) =>
+          prev.map((s) => (s.id === res.socio.id ? res.socio : s))
+        );
+        setCheckins((prev) => [res.checkin, ...prev]);
+        setResultado({ socio: res.socio, estado: "visita" });
+      }
+    }
+    setCobrando(false);
+    setCobroVisita(null);
   }
 
   async function renovar() {
@@ -194,7 +235,7 @@ export default function CheckinPage() {
                         </span>
                         {s.nombre}
                       </span>
-                      <StatusBadge estatus={calcularEstatus(s.fechaVencimiento)} />
+                      <StatusBadge estatus={estatusSocio(s)} />
                     </button>
                   ))}
                 </div>
@@ -215,19 +256,32 @@ export default function CheckinPage() {
 
               {/* Acceso permitido */}
               {(resultado?.estado === "ok" ||
-                resultado?.estado === "renovado") && (
+                resultado?.estado === "renovado" ||
+                resultado?.estado === "visita") && (
                 <div className="flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                   <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-400" />
                   <div>
                     <p className="font-display text-lg font-bold uppercase tracking-wide text-emerald-300">
                       {resultado.estado === "renovado"
                         ? "¡Membresía renovada! 💪"
-                        : `¡Bienvenido, ${resultado.socio.nombre.split(" ")[0]}! 💪`}
+                        : resultado.estado === "visita"
+                          ? "¡Visita pagada! 💪"
+                          : `¡Bienvenido, ${resultado.socio.nombre.split(" ")[0]}! 💪`}
                     </p>
                     <p className="text-sm text-emerald-200/70">
-                      Socio #{resultado.socio.folio} · Acceso registrado.
-                      Membresía {resultado.socio.tipoMembresia} vigente hasta el{" "}
-                      {formatFecha(resultado.socio.fechaVencimiento)}.
+                      {esVisita(resultado.socio.tipoMembresia) ? (
+                        <>
+                          Socio #{resultado.socio.folio} · Acceso registrado.
+                          Pase de visita válido solo hoy,{" "}
+                          {formatFecha(resultado.socio.fechaVencimiento)}.
+                        </>
+                      ) : (
+                        <>
+                          Socio #{resultado.socio.folio} · Acceso registrado.
+                          Membresía {resultado.socio.tipoMembresia} vigente hasta
+                          el {formatFecha(resultado.socio.fechaVencimiento)}.
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -286,7 +340,16 @@ export default function CheckinPage() {
           </Card>
         </div>
 
-        {/* Registro de visitas agrupado por día */}
+        <CobroVisita
+        socio={cobroVisita}
+        precio={precios.Visita}
+        yaPagoHoy={cobroVisita ? visitaPagadaHoy(cobroVisita) : false}
+        procesando={cobrando}
+        onConfirmar={confirmarCobroVisita}
+        onClose={() => setCobroVisita(null)}
+      />
+
+      {/* Registro de visitas agrupado por día */}
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <div>
