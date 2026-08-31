@@ -2,6 +2,8 @@ import type { EstatusMembresia, TipoMembresia } from "./types";
 
 /** Duración en días de cada tipo de membresía (para calcular vencimientos). */
 export const DURACION_MEMBRESIA_DIAS: Record<TipoMembresia, number> = {
+  // La visita vale solo el día en que se paga: vencimiento = fecha de inicio.
+  Visita: 0,
   Semanal: 7,
   Quincenal: 15,
   Mensual: 30,
@@ -73,6 +75,32 @@ export function calcularEstatus(
   if (dias < 0) return "Suspendida";
   if (dias <= 5) return "Por vencer";
   return "Activa";
+}
+
+/** Un visitante no tiene membresía que venza: paga cada vez que entra. */
+export function esVisita(tipo: TipoMembresia): boolean {
+  return tipo === "Visita";
+}
+
+/**
+ * Estatus mostrado para un socio. Los visitantes no se marcan "Suspendida"
+ * al día siguiente (eso implicaría que deben renovar); se marcan "Visita".
+ */
+export function estatusSocio(
+  socio: { tipoMembresia: TipoMembresia; fechaVencimiento: string },
+  hoy: Date = new Date()
+): EstatusMembresia {
+  if (esVisita(socio.tipoMembresia)) return "Visita";
+  return calcularEstatus(socio.fechaVencimiento, hoy);
+}
+
+/** True si el visitante ya cubrió el pase del día de hoy. */
+export function visitaPagadaHoy(
+  socio: { tipoMembresia: TipoMembresia; fechaVencimiento: string },
+  hoy: Date = new Date()
+): boolean {
+  if (!esVisita(socio.tipoMembresia)) return false;
+  return diasParaVencer(socio.fechaVencimiento, hoy) >= 0;
 }
 
 /** Parsea "YYYY-MM-DD" a fecha local a medianoche (sin desfase de zona horaria). */

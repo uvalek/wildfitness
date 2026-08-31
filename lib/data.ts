@@ -20,7 +20,14 @@ import type {
   IngresoMensual,
 } from "./types";
 import { supabase } from "./supabaseClient";
-import { calcularEstatus, diasParaVencer, calcularRenovacion } from "./utils";
+import {
+  calcularEstatus,
+  diasParaVencer,
+  calcularRenovacion,
+  esVisita,
+  visitaPagadaHoy,
+  toISODate,
+} from "./utils";
 import type { Rol } from "./roles";
 
 // -------------------------------- ROLES ------------------------------------
@@ -177,6 +184,39 @@ export async function addSocio(input: {
   return toSocio(data as SocioRow);
 }
 
+/**
+ * Busca un socio por teléfono. Sirve para reconocer a un visitante que
+ * regresa, en vez de darlo de alta otra vez. Compara solo los dígitos, así
+ * "55 1234 5678" y "5512345678" son el mismo número.
+ */
+export async function buscarSocioPorTelefono(
+  telefono: string
+): Promise<Socio | null> {
+  const digitos = telefono.replace(/\D/g, "");
+  if (digitos.length < 7) return null;
+  const socios = await getSocios();
+  return (
+    socios.find((s) => s.telefono.replace(/\D/g, "") === digitos) ?? null
+  );
+}
+
+/**
+ * Cobra el pase del día a un visitante: deja su vigencia en HOY y registra
+ * la entrada. Se llama solo después de que el recepcionista confirma el pago.
+ */
+export async function registrarVisitaPagada(
+  socioId: string
+): Promise<{ socio: Socio; checkin: Checkin } | null> {
+  const hoy = toISODate(new Date());
+  const socio = await updateSocio(socioId, {
+    fechaInicio: hoy,
+    fechaVencimiento: hoy,
+  });
+  if (!socio) return null;
+  const checkin = await registrarCheckin(socio.id);
+  return { socio, checkin };
+}
+
 export async function updateSocio(
   id: string,
   patch: Partial<{
@@ -235,6 +275,7 @@ export async function getMembresiasPorVencer(dias = 5): Promise<Socio[]> {
   const socios = await getSocios();
   return socios
     .filter((s) => {
+      if (esVisita(s.tipoMembresia)) return false;
       const d = diasParaVencer(s.fechaVencimiento);
       return d >= 0 && d <= dias;
     })
@@ -402,7 +443,9 @@ export async function getCheckinsRecientes(dias = 5): Promise<Checkin[]> {
 export async function registrarCheckin(socioId: string): Promise<Checkin> {
   const socio = await getSocioById(socioId);
   if (!socio) throw new Error("Socio no encontrado");
-  const vigente = calcularEstatus(socio.fechaVencimiento) !== "Suspendida";
+  const vigente = esVisita(socio.tipoMembresia)
+    ? visitaPagadaHoy(socio)
+    : calcularEstatus(socio.fechaVencimiento) !== "Suspendida";
 
   const { data, error } = await supabase
     .from("wf_checkins")
@@ -426,9 +469,10 @@ export async function getKPIsDashboard(): Promise<KPIsDashboard> {
   ]);
 
   const sociosActivos = socios.filter(
-    (s) => calcularEstatus(s.fechaVencimiento) === "Activa"
+    (s) => !esVisita(s.tipoMembresia) && calcularEstatus(s.fechaVencimiento) === "Activa"
   ).length;
   const membresiasPorVencer = socios.filter((s) => {
+    if (esVisita(s.tipoMembresia)) return false;
     const d = diasParaVencer(s.fechaVencimiento);
     return d >= 0 && d <= 5;
   }).length;
@@ -460,7 +504,9 @@ export async function getResumenIngresos(): Promise<ResumenIngresos> {
   ]);
 
   const activos = socios.filter(
-    (s) => calcularEstatus(s.fechaVencimiento) !== "Suspendida"
+    (s) =>
+      !esVisita(s.tipoMembresia) &&
+      calcularEstatus(s.fechaVencimiento) !== "Suspendida"
   );
   const tipos: TipoMembresia[] = ["Semanal", "Quincenal", "Mensual", "Anual"];
   const desglosePorMembresia = tipos.map((tipo) => {
@@ -490,7 +536,7 @@ export async function getPreciosMembresia(): Promise<
     .from("wf_precios_membresia")
     .select("*");
   if (error) fail("getPreciosMembresia", error);
-  const map = { Semanal: 0, Mensual: 0, Anual: 0 } as Record<
+  const map = { Visita: 0, Semanal: 0, Quincenal: 0, Mensual: 0, Anual: 0 } as Record<
     TipoMembresia,
     number
   >;

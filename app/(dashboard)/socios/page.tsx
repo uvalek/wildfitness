@@ -18,16 +18,25 @@ import type { Socio, TipoMembresia } from "@/lib/types";
 import {
   formatFecha,
   calcularEstatus,
+  estatusSocio,
+  esVisita,
   formatMXN,
   DURACION_MEMBRESIA_DIAS,
   sumarDias,
   toISODate,
 } from "@/lib/utils";
 
-const TIPOS: TipoMembresia[] = ["Semanal", "Quincenal", "Mensual", "Anual"];
+const TIPOS: TipoMembresia[] = [
+  "Visita",
+  "Semanal",
+  "Quincenal",
+  "Mensual",
+  "Anual",
+];
 
 // Valores por defecto mientras carga la consulta a la base de datos.
 const PRECIOS_DEFAULT: Record<TipoMembresia, number> = {
+  Visita: 75,
   Semanal: 100,
   Quincenal: 180,
   Mensual: 300,
@@ -58,13 +67,26 @@ export default function SociosPage() {
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
     if (!q) return socios;
+    const digitos = q.replace(/\D/g, "");
     return socios.filter(
       (s) =>
-        s.nombre.toLowerCase().includes(q) || String(s.folio).includes(q)
+        s.nombre.toLowerCase().includes(q) ||
+        String(s.folio).includes(q) ||
+        (digitos.length >= 3 && s.telefono.replace(/\D/g, "").includes(digitos))
     );
   }, [socios, busqueda]);
 
   const vencimiento = sumarDias(inicio, DURACION_MEMBRESIA_DIAS[tipo]);
+
+  // Si el teléfono ya existe, probablemente sea alguien que regresa: se avisa
+  // para no crear un duplicado (sobre todo con visitantes).
+  const yaRegistrado = useMemo(() => {
+    const digitos = telefono.replace(/\D/g, "");
+    if (digitos.length < 7) return null;
+    return (
+      socios.find((s) => s.telefono.replace(/\D/g, "") === digitos) ?? null
+    );
+  }, [socios, telefono]);
   const [renovandoId, setRenovandoId] = useState<string | null>(null);
   const [huellaDe, setHuellaDe] = useState<Socio | null>(null);
 
@@ -168,7 +190,7 @@ export default function SociosPage() {
                     {formatFecha(s.fechaVencimiento)}
                   </td>
                   <td className="px-5 py-3.5">
-                    <StatusBadge estatus={calcularEstatus(s.fechaVencimiento)} />
+                    <StatusBadge estatus={estatusSocio(s)} />
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
@@ -181,7 +203,8 @@ export default function SociosPage() {
                       <Fingerprint size={13} />
                       Huella
                     </button>
-                    {calcularEstatus(s.fechaVencimiento) !== "Activa" && (
+                    {!esVisita(s.tipoMembresia) &&
+                      calcularEstatus(s.fechaVencimiento) !== "Activa" && (
                       <button
                         onClick={() => renovar(s)}
                         disabled={renovandoId === s.id}
@@ -236,6 +259,16 @@ export default function SociosPage() {
               placeholder="55 1234 5678"
               className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
             />
+            {yaRegistrado && (
+              <p className="mt-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/80">
+                Este teléfono ya es de{" "}
+                <span className="font-semibold text-amber-300">
+                  {yaRegistrado.nombre}
+                </span>{" "}
+                (socio #{yaRegistrado.folio}). Si es la misma persona, regístrale
+                la entrada desde Check-in en vez de crearla otra vez.
+              </p>
+            )}
           </Campo>
 
           <div className="grid grid-cols-2 gap-4">
@@ -264,11 +297,24 @@ export default function SociosPage() {
           </div>
 
           <div className="rounded-lg border border-ink-800 bg-ink-850/60 px-3 py-2.5 text-xs text-white/50">
-            Vence el{" "}
-            <span className="font-semibold text-white/80">
-              {formatFecha(vencimiento)}
-            </span>{" "}
-            · Cobro: {formatMXN(precios[tipo])}
+            {esVisita(tipo) ? (
+              <>
+                Pase válido solo el{" "}
+                <span className="font-semibold text-white/80">
+                  {formatFecha(inicio)}
+                </span>{" "}
+                · Cobro por visita: {formatMXN(precios[tipo])}. Si regresa, se
+                le cobra de nuevo desde Check-in.
+              </>
+            ) : (
+              <>
+                Vence el{" "}
+                <span className="font-semibold text-white/80">
+                  {formatFecha(vencimiento)}
+                </span>{" "}
+                · Cobro: {formatMXN(precios[tipo])}
+              </>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

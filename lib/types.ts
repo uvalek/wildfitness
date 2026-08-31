@@ -1,11 +1,24 @@
 // Tipos centrales del dominio Olimpo Gym.
 // Diseñados para mapear 1:1 a tablas de Supabase más adelante.
 
-export type TipoMembresia = "Semanal" | "Quincenal" | "Mensual" | "Anual";
+// "Visita" es un pase de un día: no es una membresía recurrente. El socio
+// queda guardado (se le reconoce por teléfono si vuelve) y paga cada vez.
+export type TipoMembresia =
+  | "Visita"
+  | "Semanal"
+  | "Quincenal"
+  | "Mensual"
+  | "Anual";
 
 // La membresía nunca se "cancela": al vencer pasa a "Suspendida" (sin acceso)
 // hasta que el socio renueve.
-export type EstatusMembresia = "Activa" | "Por vencer" | "Suspendida";
+// "Visita" no es un estado que se venza: marca que ese registro es un
+// visitante, no un socio con membresía vigente.
+export type EstatusMembresia =
+  | "Activa"
+  | "Por vencer"
+  | "Suspendida"
+  | "Visita";
 
 export type CategoriaProducto = "Bebida" | "Snack" | "Suplemento";
 
