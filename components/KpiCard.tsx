@@ -5,18 +5,18 @@ export function KpiCard({
   titulo,
   valor,
   icon: Icon,
-  acento = "blood",
+  acento = "accent",
   nota,
 }: {
   titulo: string;
   valor: string | number;
   icon: LucideIcon;
-  acento?: "blood" | "emerald" | "amber" | "sky";
+  acento?: "accent" | "violet" | "amber" | "sky";
   nota?: string;
 }) {
   const acentos = {
-    blood: "from-blood-500/20 text-blood-400 ring-blood-500/30",
-    emerald: "from-emerald-500/20 text-emerald-400 ring-emerald-500/30",
+    accent: "from-accent-500/20 text-accent-400 ring-accent-500/30",
+    violet: "from-violet-500/20 text-violet-400 ring-violet-500/30",
     amber: "from-amber-500/20 text-amber-400 ring-amber-500/30",
     sky: "from-sky-500/20 text-sky-400 ring-sky-500/30",
   }[acento];

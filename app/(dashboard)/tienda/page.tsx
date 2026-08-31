@@ -175,7 +175,7 @@ export default function TiendaPage() {
           gestionar ? (
             <button
               onClick={abrirNuevo}
-              className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110"
+              className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110"
             >
               <PackagePlus size={18} />
               Nuevo producto
@@ -231,7 +231,7 @@ export default function TiendaPage() {
                       </td>
                       <td className="px-5 py-3.5">
                         {bajo ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-md bg-blood-500/15 px-2 py-1 text-xs font-semibold text-blood-400">
+                          <span className="inline-flex items-center gap-1.5 rounded-md bg-danger-500/15 px-2 py-1 text-xs font-semibold text-danger-400">
                             <AlertTriangle size={13} />
                             {p.stock} · bajo
                           </span>
@@ -262,7 +262,7 @@ export default function TiendaPage() {
                             <button
                               onClick={() => setEliminando(p)}
                               title="Eliminar producto"
-                              className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-blood-500/50 hover:bg-blood-500/10 hover:text-blood-400"
+                              className="inline-flex items-center justify-center rounded-lg border border-ink-700 p-2 text-white/50 transition hover:border-danger-500/50 hover:bg-danger-500/10 hover:text-danger-400"
                             >
                               <Trash2 size={15} />
                             </button>
@@ -290,7 +290,7 @@ export default function TiendaPage() {
         {/* Punto de venta */}
         <Card>
           <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold uppercase tracking-wide text-white">
-            <ShoppingCart size={18} className="text-blood-500" />
+            <ShoppingCart size={18} className="text-accent-500" />
             Punto de venta
           </h2>
 
@@ -305,7 +305,7 @@ export default function TiendaPage() {
                   setProductoId(e.target.value);
                   setError(null);
                 }}
-                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500"
+                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
               >
                 {productos.map((p) => (
                   <option key={p.id} value={p.id} disabled={p.stock === 0}>
@@ -335,7 +335,7 @@ export default function TiendaPage() {
                   onChange={(e) =>
                     setCantidad(Math.max(1, Number(e.target.value) || 1))
                   }
-                  className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-center text-sm text-white outline-none focus:border-blood-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-center text-sm text-white outline-none focus:border-accent-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <button
                   type="button"
@@ -360,7 +360,7 @@ export default function TiendaPage() {
             </div>
 
             {error && (
-              <p className="rounded-lg bg-blood-500/10 px-3 py-2 text-xs text-blood-400">
+              <p className="rounded-lg bg-danger-500/10 px-3 py-2 text-xs text-danger-400">
                 {error}
               </p>
             )}
@@ -368,7 +368,7 @@ export default function TiendaPage() {
             <button
               type="submit"
               disabled={procesando || !seleccionado || seleccionado.stock === 0}
-              className="w-full rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
+              className="w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 py-3 font-display text-sm font-bold uppercase tracking-widest text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
             >
               {procesando ? "Registrando…" : "Registrar venta"}
             </button>
@@ -387,7 +387,7 @@ export default function TiendaPage() {
             <p className="text-xs uppercase tracking-wide text-white/40">
               Total del día
             </p>
-            <p className="font-display text-lg font-bold text-blood-400">
+            <p className="font-display text-lg font-bold text-accent-400">
               {formatMXN(totalHoy)}
             </p>
           </div>
@@ -453,7 +453,7 @@ export default function TiendaPage() {
               required
               autoFocus
               placeholder="Ej. Proteína Whey 2lb"
-              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500"
+              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
             />
           </label>
 
@@ -466,7 +466,7 @@ export default function TiendaPage() {
               onChange={(e) =>
                 setNCategoria(e.target.value as CategoriaProducto)
               }
-              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500"
+              className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500"
             >
               {CATEGORIAS.map((c) => (
                 <option key={c} value={c}>
@@ -489,7 +489,7 @@ export default function TiendaPage() {
                 onChange={(e) => setNPrecio(e.target.value)}
                 required
                 placeholder="0"
-                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
               />
             </label>
             <label className="block">
@@ -504,7 +504,7 @@ export default function TiendaPage() {
                 onChange={(e) => setNStock(e.target.value)}
                 required
                 placeholder="0"
-                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
               />
             </label>
           </div>
@@ -520,7 +520,7 @@ export default function TiendaPage() {
             <button
               type="submit"
               disabled={guardandoProd}
-              className="rounded-lg bg-gradient-to-r from-blood-500 to-blood-700 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
+              className="rounded-lg bg-gradient-to-r from-accent-600 to-accent-800 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
             >
               {guardandoProd
                 ? "Guardando…"
@@ -566,7 +566,7 @@ export default function TiendaPage() {
             onChange={(e) => setAddCantidad(e.target.value)}
             autoFocus
             placeholder="0"
-            className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-blood-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white outline-none focus:border-accent-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
           />
           {addStock && Number(addCantidad) > 0 && (
             <p className="mt-1.5 text-xs text-emerald-400">

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Olimpo Gym">
+  <title>Olimpo Gym</title>
+  <defs>
+    <linearGradient id="og-verde" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1fd677"/>
+      <stop offset="100%" stop-color="#009b4e"/>
+    </linearGradient>
+  </defs>
+  <!-- Frontón del templo (blanco, hace de "cima del Olimpo") -->
+  <path d="M32 3.5 61.5 24.2H2.5Z" fill="#ffffff"/>
+  <!-- Arquitrabe -->
+  <rect x="6" y="27" width="52" height="5" rx="1.6" fill="url(#og-verde)"/>
+  <!-- Columnas dóricas -->
+  <rect x="11" y="34.5" width="8" height="18" rx="1.6" fill="url(#og-verde)"/>
+  <rect x="28" y="34.5" width="8" height="18" rx="1.6" fill="url(#og-verde)"/>
+  <rect x="45" y="34.5" width="8" height="18" rx="1.6" fill="url(#og-verde)"/>
+  <!-- Estilóbato (base) -->
+  <rect x="2.5" y="55" width="59" height="6" rx="2" fill="url(#og-verde)"/>
+</svg>

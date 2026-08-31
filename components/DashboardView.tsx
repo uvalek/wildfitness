@@ -14,23 +14,23 @@ import { IngresosChart } from "@/components/IngresosChart";
 import type { KPIsDashboard, IngresoMensual, Socio } from "@/lib/types";
 import { formatMXN, formatFecha, diasParaVencer, cn } from "@/lib/utils";
 
-type Acento = "emerald" | "blood" | "amber" | "sky";
+type Acento = "accent" | "violet" | "amber" | "sky";
 
 const ESTILOS: Record<
   Acento,
   { glow: string; badge: string; ring: string; marca: string }
 > = {
-  emerald: {
-    glow: "bg-emerald-500/15",
-    badge: "bg-emerald-500/15 text-emerald-400",
-    ring: "ring-emerald-400/25",
-    marca: "text-emerald-500/[0.05]",
+  violet: {
+    glow: "bg-violet-500/15",
+    badge: "bg-violet-500/15 text-violet-400",
+    ring: "ring-violet-400/25",
+    marca: "text-violet-500/[0.05]",
   },
-  blood: {
-    glow: "bg-blood-600/20",
-    badge: "bg-blood-500/15 text-blood-400",
-    ring: "ring-blood-400/25",
-    marca: "text-blood-500/[0.06]",
+  accent: {
+    glow: "bg-accent-600/20",
+    badge: "bg-accent-500/15 text-accent-400",
+    ring: "ring-accent-400/25",
+    marca: "text-accent-500/[0.06]",
   },
   amber: {
     glow: "bg-amber-500/15",
@@ -125,7 +125,7 @@ export function DashboardView({
     <>
       <PageHeader
         titulo="Dashboard"
-        descripcion="Resumen general de Wild Fitness"
+        descripcion="Resumen general de Olimpo Gym"
       />
 
       {/* KPIs — iconos protagonistas */}
@@ -134,7 +134,7 @@ export function DashboardView({
           titulo="Socios activos"
           valor={kpis ? kpis.sociosActivos : "—"}
           icon={Users}
-          acento="emerald"
+          acento="accent"
           nota="Membresías vigentes"
           delay={0}
         />
@@ -142,7 +142,7 @@ export function DashboardView({
           titulo="Ingresos del mes"
           valor={kpis ? formatMXN(kpis.ingresosMes) : "—"}
           icon={DollarSign}
-          acento="blood"
+          acento="sky"
           nota="Membresías + tienda"
           delay={70}
         />
@@ -158,7 +158,7 @@ export function DashboardView({
           titulo="Ventas de tienda hoy"
           valor={kpis ? formatMXN(kpis.ventasTiendaHoy) : "—"}
           icon={ShoppingBag}
-          acento="sky"
+          acento="violet"
           nota="Punto de venta"
           delay={210}
         />
@@ -171,7 +171,7 @@ export function DashboardView({
           className="animate-fade-up rounded-[1.75rem] bg-ink-900/50 p-6 ring-1 ring-white/[0.04] lg:col-span-2"
         >
           <div className="mb-5 flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-blood-500/15 text-blood-400 ring-1 ring-inset ring-blood-400/25">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-accent-500/15 text-accent-400 ring-1 ring-inset ring-accent-400/25">
               <TrendingUp size={22} strokeWidth={2} />
             </span>
             <div>
@@ -234,7 +234,7 @@ export function DashboardView({
                     className={cn(
                       "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
                       dias <= 1
-                        ? "bg-blood-500/15 text-blood-400"
+                        ? "bg-danger-500/15 text-danger-400"
                         : "bg-amber-500/15 text-amber-400"
                     )}
                   >

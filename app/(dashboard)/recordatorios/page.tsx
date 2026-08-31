@@ -10,7 +10,7 @@ import { formatFecha, diasParaVencer } from "@/lib/utils";
 
 function mensajeWhatsApp(s: Socio) {
   const nombre = s.nombre.split(" ")[0];
-  return `Hola ${nombre} 👋 Tu membresía de Wild Fitness vence el ${formatFecha(
+  return `Hola ${nombre} 👋 Tu membresía de Olimpo Gym vence el ${formatFecha(
     s.fechaVencimiento
   )}. ¡Renueva para no perder tu acceso! 💪`;
 }

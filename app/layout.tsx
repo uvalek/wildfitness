@@ -16,8 +16,8 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "Wild Fitness — Gestión",
-  description: "Sistema de gestión para gimnasio Wild Fitness",
+  title: "Olimpo Gym — Gestión",
+  description: "Sistema de gestión para Olimpo Gym",
 };
 
 export default function RootLayout({

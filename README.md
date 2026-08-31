@@ -1,4 +1,4 @@
-# Wild Fitness — Sistema de gestión (Demo)
+# Olimpo Gym — Sistema de gestión (Demo)
 
 Demo funcional de gestión para gimnasio. Next.js (App Router) + TypeScript + Tailwind + recharts + lucide-react.
 
@@ -41,7 +41,9 @@ Dos roles (tabla `wf_perfiles`, definición en [`lib/roles.ts`](lib/roles.ts)):
 con funciones `async` conectadas a **Supabase** (proyecto *SuperCerebro*) mediante
 [`lib/supabaseClient.ts`](lib/supabaseClient.ts). La UI nunca habla con la base directamente.
 
-Tablas (prefijo `wf_` para aislarlas del resto del proyecto):
+Tablas (prefijo `wf_` para aislarlas del resto del proyecto). El prefijo se
+conserva a propósito: el rebrand a Olimpo Gym es solo visual y reutiliza la
+**misma** base de datos, así que no hay migración ni renombrado de tablas.
 
 | Tabla                    | Contenido                                            |
 | ------------------------ | ---------------------------------------------------- |
